@@ -1,0 +1,47 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Complile Tex
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push events for the master branch
+  push:
+    branches: 
+    - main
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    permissions:
+          contents: write
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: Compile Document
+        uses: xu-cheng/latex-action@v2
+        with:
+        # The root LaTeX file to be compiled
+         root_file: ./main.tex
+         latexmk_shell_escape: true
+         extra_system_packages: "gnuplot"
+      # Removes the latest release, so that we can create a new one in its place
+      - name: Delete latest release
+        uses: ame-yu/action-delete-latest-release@v2
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: main.pdf
+          tag_name: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
