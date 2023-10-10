@@ -1,0 +1,55 @@
+\documentclass{article}
+\usepackage{graphicx} 
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amsfonts, amssymb, bm}
+\usepackage{graphicx, geometry, wrapfig, float, multicol, mathtools, array, csquotes, lscape, setspace}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[export]{adjustbox}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usetikzlibrary{positioning, fit}
+\usepackage{multirow, booktabs, makecell, diagbox}
+\usepackage{soul}
+\usepackage{hyperref}
+\usepackage{xstring}
+
+\hypersetup{
+    colorlinks=true,
+    allcolors=.,
+    pdftitle={Explainable AI Notes},
+    linkcolor=black
+    }
+\geometry{
+    top=3.5cm,
+    bottom=3.0cm,
+    outer=1.0cm,
+    inner=2.0cm
+}
+\newcommand{\red}{\color{red}}
+\newcommand{\blue}{\color{blue}}
+\newcommand{\black}{\color{black}}
+% Required for inserting images
+\setlength{\parindent}{0mm}
+\DeclareMathOperator{\EX}{\mathbb{E}}% expected value
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\renewcommand{\ref}[1]{\textbf{\ref{#1}}}
+
+\begin{document}
+\title{ \normalsize \textsc{}
+		\\ [2.0cm]
+		\HRule{1.5pt} \\
+		\LARGE \textbf{\uppercase{Explainable AI}
+		\HRule{2.0pt} \\ [0.6cm] \LARGE{Academic Year: 2023/2024} \vspace*{10\baselineskip}}
+		}
+
+\author{\textbf{Author} \\ 
+    Lorenzo Bonanni\\
+    lorenzo.bonanni@studenti.univr.it}
+
+\maketitle
+\newpage
+\tableofcontents
+
+\include{sections/introduction}
+
+\end{document}

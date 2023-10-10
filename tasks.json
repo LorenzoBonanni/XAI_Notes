@@ -1,0 +1,43 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+          {
+            "label": "Run pdflatex",
+            "type": "shell",
+            "group": "build",
+            "command": "pdflatex",
+            "args": [
+                "-synctex=1",
+                "-interaction=nonstopmode",
+                "-file-line-error",
+                "_CFA.tex"
+            ]
+        },
+        {
+            "label": "Run bibtex",
+            "type": "shell",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "command": "bibtex",
+            "args": [
+                "-terse",
+                "*.aux"
+            ]
+        },
+        {
+            "label": "update pdf",
+            "command": "${command:latex-workshop.refresh-viewer}"
+        },
+        {
+            "label": "Compile and update",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOrder": "sequence",
+            "dependsOn": ["Run pdflatex", "update pdf"]
+        }
+    ]
+}
