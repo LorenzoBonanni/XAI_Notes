@@ -1,4 +1,4 @@
-\part{Introduction \& Motivation}
+\section{Introduction \& Motivation}
 AI (and particularly ML) can solve very complex problems in real life such as: Autonomous vehicles, Industrial automation and robotics Medical imaging and diagnosis ecc..
 The problem with most of the ML models is that they are black boxs i.e we cannot understand the motivation behind the output.\\
 
@@ -17,31 +17,31 @@ We can summarize the motivation into 5 main points:
     \item Model's developmental perspective
     \item End-user and social perspective
 \end{enumerate}
-\section{Motivation}
-\subsection*{Regulatory Perspective}
+\subsection{Motivation}
+\subsubsection*{Regulatory Perspective}
 Black-box AI systems are being utilized in many areas of our daily lives, which could be resulting in unacceptable decisions, especially those that may lead to legal effects. 
 The European Union's General Data Protection Regulation (GDPR)\footnote{\url{https://www.privacy-regulation.eu/en/r71.htm}} is an example of why XAI is needed from a regulatory perspective. 
 These regulations create what is called the \emph{right to explanation}, by which a user is entitled to request an explanation about the decision made by the algorithm that considerably influences them.
 
-\subsection*{Scientific Perspective}
+\subsubsection*{Scientific Perspective}
 When building black-box AI models, we aim to develop an approximate function to address the given problem. 
 Therefore, after creating the black-box AI model, the created model represents the basis of knowledge, rather than the data. 
 Based on that, XAI can be helpful to reveal the scientific knowledge extracted by the black-box AI models, which could lead to discovering novel
 concepts in various branches of science.
 
-\subsection*{Industrial perspective}
+\subsubsection*{Industrial perspective}
 Regulations and user distrust in black-box AI systems represent challenges to the industry in applying complex and accurate 
 black-box AI systems. Less accurate models that are more interpretable may be preferred in the industry because of regulation
 reasons. A major advantage of XAI is that it can help in mitigating the common trade-off between model interpretability and performance,
 thus meeting these common challenges. 
 However, it can increase development and deployment costs.
 
-\subsection*{Model's developmental perspective}
+\subsubsection*{Model's developmental perspective}
 Several reasons could contribute to inappropriate results for black-box AI systems, such as limited training data, biased training data, outliers, adversarial data, and model overfitting. 
 Therefore, what black-box AI systems have learned and why they make decisions need to be understood, primarily when they affect humans lives. 
 For that, the aim will be to use XAI to understand, debug, and improve the black-box AI system to enhance its robustness, increase safety and user trust, and minimize or prevent faulty behavior, bias, unfairness, and discrimination.
 
-\subsection*{End-user and social perspective}
+\subsubsection*{End-user and social perspective}
 In the literature of deep learning, it has been shown that altering an image such that humans cannot observe the change can lead the model in producing a wrong class label (Adversarial Attacks). 
 On the contrary, completely unrecognizable images to humans can be recognizable with high confidence using DL models.
 Such findings could raise doubts about trusting such black-box AI models. 
@@ -52,7 +52,7 @@ the system serves what it is designed for instead of what it was trained for. Fu
 interpretable models.
 
 % \part{title}
-\section{XAI - One topic, two keywords}
+\subsection{XAI - One topic, two keywords}
 \begin{minipage}[c]{0.3\textwidth}
     \begin{figure}[H]
         \includegraphics[width=\textwidth]{img/many_words.png}
@@ -68,7 +68,7 @@ interpretable models.
     Explainablility provide insights about an AI model while Interpretability tells if the insights make sense to the audience.
 \end{minipage}
 
-\section{Types of XAI}
+\subsection{Types of XAI}
 \begin{minipage}[c]{0.5\textwidth}
     \begin{figure}[H]
         \includegraphics[width=0.8\textwidth]{img/types_XAI.png}
