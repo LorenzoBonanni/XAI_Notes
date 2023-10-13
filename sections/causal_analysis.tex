@@ -72,8 +72,24 @@ CMI (also called Related Entropy) comes from the concept of KL(Kullback-Leibler)
 \begin{equation}
     D(p||q)=\sum_{x\in\mathcal{X}}p(x)\log{\frac{p(x)}{q(x)}}
 \end{equation}
-The KL divergence measures the degree of similarity between two distribution namely $p$ and $q$.
-Similarly Mutual Information (MI) measures the discrepancy between joint distribution and the product of individual distributions.
+The KL divergence measures the degree of similarity (the distance) between two distribution namely $p$ and $q$.\\
+
+The equation for the KL divergence seems to come out of the air, but in reality the equation is really simple...
+
+We have two pieces, the first $\frac{p(x)}{q(x)}$ measures the distance between 
+the distribution $p$ and the distribution $q$, then we add the $log$, we do that 
+because if $p(x)=q(x)$ (i.e they are the same distribution) then the division will 
+be 1. Since they are the same distribution the distance between the distributions should be 0 but for now it is only 1. 
+If we add the $log$ then $\log(1)=0$ and so the distance is 0. The second piece $p(x)$ is a weight, this 
+is used because we want to weight the distance based on the likelihood of the input
+ $x$, this mean that we care less of high distance if the input is unlikely.
+I've omitted a small detail, I've talked about distance between distributions 
+but in reality what I meant was distance between points(e.g $p(x)$) in the 
+distributions and so we need to add a summation to the equation 
+(or an integral in the case of continuous distributions) so to add the contribution
+ of each individual point.\\
+
+Similarly Mutual Information (MI) measures the \textbf{discrepancy} between \textbf{joint distribution} (p(x,y)) and the \textbf{product} (p(x)p(y)) of individual distributions.
 Mutual Information(MI) is the same as CMI (eq \ref{eq:cmi}) but without the conditioning on $z$, so for the dicrete case the equation is:
 \begin{equation}\label{eq:mi_disc}
     \begin{split}
@@ -122,7 +138,7 @@ So with MI we are trying to check if $x$ and $y$ are dependent:\\
         \end{equation}
     \end{minipage}
 \end{center}
-\newpage
+% \newpage
 So to recap:
 \begin{itemize}
     \item $x \text{ and } y$ DEPENDANT$\rightarrow\;MI\ne 0$
