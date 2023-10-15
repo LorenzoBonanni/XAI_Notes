@@ -309,4 +309,43 @@ converges to the true causal graph in the limit of infinite sample size. That is
 the wrong graph becomes arbitrarily small if enough data is available, for any distribution $P$ (hence “universal”).
 
 \subsubsection{FullCI Algorithm}
-This is the
+This is the simples algorithm that one can come up with, it tests for conditional independence between each
+$X^i_{t-\tau}$ and $X^j_t$ conditioned on the entire past $\bm{X}_t^{(t-1,\;\ldots\;, t-\tau_{max})}$ excluding $X^i_{t-\tau}$.
+\begin{equation}
+    I^{FullCI}_{i\rightarrow j}(\tau)=I(X^i_{t-\tau};X_t^j|\bm{X}_t^{(t-1,\;\ldots\;, t-\tau_{max})}\setminus\{X^i_{t-\tau}\})
+\end{equation}
+This approach strongly suffers from the curse of dimensionality.
+Complexity depends on the functional dependency assumption, assuming Linear dependency the complexity is
+$\mathcal{O}(n(N\tau_{max})^2)$, where $N$ is the number of variables and $n$ is the sample size.
+
+\subsection{Optimal Causation Entropy (OCE)}
+A discovery algorithm based on the information-theoretic optimal causation entropy principle which reconstructs 
+the lagged parents of a variable $X_t^j$ by an \textbf{iterative} procedure alleviating the curse of dimensionality.
+Evaluates CMI \& Mutual Information (MI) in a forward-backward scheme for each variable.
+
+\begin{equation}
+    I(X;Y)=\int_Y\int_X{p(x,y)\log_2{\frac{p(x, y)}{p_1(x)p_2(y)}}dx\;dy}
+\end{equation}
+\begin{itemize}
+    \item Forward: populate causal parents $\mathcal{P}^{OCE}(X^j_t)=\emptyset$
+        \begin{itemize}
+            \item 1st parent $\leftarrow$ maximize $I(X^i_{t-\tau};X^j_{t})$ for all $X^i_{t-\tau}\in\bm{X}_t^-$
+            \item 2nd parent $\leftarrow$ maximize CMI $I(X^i_{t-\tau};X^j_{t}|X^{(1)})$
+            \item 3rd parent $\leftarrow$ maximize CMI $I(X^i_{t-\tau};X^j_{t}|X^{(1)},X^{(2)})$
+            \item $\ldots$ until CMI is significant (e.g., with t-test or non-linear methods) at each step we condition on all previous parents
+        \end{itemize}
+    \item Backward: prune not significant parents
+    \begin{equation*}
+        X^i_{t-\tau}\Perp X^j_{t} \;|\; \hat{\mathcal{P}}^{OCE}(X^j_t)\setminus\{X^i_{t-\tau}\}\quad
+        \forall X^i_{t-\tau}\in\hat{\mathcal{P}}^{OCE}(X^j_t)
+    \end{equation*}
+    This means if the variable ($X^j_{t}$) is conditionally indipendent of a parent ($X^i_{t-\tau}$) given all the other parents
+    excluded the parent we are evaluating ($\hat{\mathcal{P}}^{OCE}(X^j_t)\setminus\{X^i_{t-\tau}\}$) we can remove $X^i_{t-\tau}$
+\end{itemize}
+
+This algorithm has two main \textbf{\textcolor{Green}{advantages}}:
+\begin{itemize}
+    \item It is not necessary to condition on all variables and on all times
+    \item The complexity is polynomial
+\end{itemize}
+While the main \textbf{\textcolor{Red}{drawback}} is that useless parents are added.
