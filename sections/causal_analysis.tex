@@ -86,7 +86,7 @@ is used because we want to weight the distance based on the likelihood of the in
 I've omitted a small detail, I've talked about distance between distributions 
 but in reality what I meant was distance between points(e.g $p(x)$) in the 
 distributions and so we need to add a summation to the equation 
-(or an integral in the case of continuous distributions) so to add the contribution
+(or an integral in case of continuous distributions) so to add the contribution
  of each individual point.\\
 
 Similarly Mutual Information (MI) measures the \textbf{discrepancy} between \textbf{joint distribution} (p(x,y)) and the \textbf{product} (p(x)p(y)) of individual distributions.
@@ -154,9 +154,159 @@ $I^{FullCI}_{i\rightarrow j}(\tau)=I(X^i_{t-\tau};X^j_t|\bm{X}_t^{(t-1,\ldots,t-
 \\here $\bm{X}_t^{(t-1,\ldots,t-\tau_{max})}$ is what we called $Z$ before i.e the past of all the variables.\\
 
 To better understand causasality we can visualize it as a graph:
-\begin{figure}[H]
+\begin{figure}[H] \label{fig:causalgraph}
     \centering
     \includegraphics[width=0.8\textwidth]{img/visualization.jpeg}
+    \caption{A time series dataset (panel A) from a complex system of which we try to reconstruct the underlying causal dependencies (panel B), 
+    accounting for linear and nonlinear dependencies and including their time lags (link labels). }
 \end{figure}
-Consider a time series dataset (panel A) from a complex system of which we try to reconstruct the underlying causal dependencies (panel B), 
-accounting for linear and nonlinear dependencies and including their time lags (link labels). 
+Figure \ref{fig:causalgraph}B represents the causal realation between variables, you can see solid and dashed lines.
+The first represents a real causal relation between variables, while the second represent what's called a spurious association, 
+this means that we find a relation between variables but those varibles are not related and this relation occurs either by chance 
+or it is caused by a third unseed variable.\\\\
+A simple example of this can be a causal graph representing the relation between the \emph{number of ice cream cones sold} in a city
+per month and the \emph{number of sunburn cases} reported in the city per month.
+If we analize that graph we can see that the number of ice cream cones sold in one month causes the number of sunburn cases reported in the next month.
+Intuitively this relation does not make sense, how is it possible that an increase in number of ice creams sold causes the number of sunburs to raise?
+In fact this relation is spurious since both are caused by a third variable, namely the \emph{average temperature} in the city per month.
+Higher temperatures cause more people to buy ice cream and also expose themselves to the sun, leading to more sunburns.
+As you can see in the picture on top of the edges there is written a number, it states the time lag difference in the relation, to make it more clear 
+let's go back to the ice cream example. Assume $X^3$ is the number of ice cream sold and $X^2$ represents the number of sun burns.
+As we said before the number of ice cream cones sold in one month causes the number of sunburn cases reported in the \textbf{next month}, 
+here the key point is next month, as we can see in the graph is written as $\tau=1$ this means that $X^3_{t-1}\rightarrow X^2_{t}$, where the arrow represents the causal realtion.
+
+% TODO: Figure \ref{fig:causalgraph}C
+
+\subsection{Causal Discovery}
+The goal of causal discovery is to identify causal links, distinguishing them from spurious associations depending on inherent
+correlations between variables.
+Before doing so we may need to make some assumptions on the nature of time series variables
+(i.e., on the underlying system's structure).
+
+\subsubsection*{Causal sufficiency}
+\begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=\textbf{Causal sufficiency Definition}]
+    A set $W\subset V\times\mathbb{Z}$ of variables is causally sufficent for a process \textbf{X} if and only if in the process 
+    every common cause of any two or more variables in $W$ is in $W$ or has the same values for all units in the population.
+\end{tcolorbox}
+This simply means that it is never the case that a variable is determined on all other variables at all possible delays.\\
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.2\textwidth]{img/causalsuff.jpeg}
+    \caption{Example where Cusal Sufficency does not hold}
+    \label{fig:causalsuff}
+\end{figure}
+Causal Sufficency is not always true, as we can see in Figure \ref{fig:causalsuff}, there if we dont't
+observe the spurious variable $U$ we have that $Z$ depends on all the varibles (namely $X$ and $Y$).
+
+\subsubsection*{Causal Markov Condition}
+\begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=\textbf{Separation Definition}]
+    Two nodes $A$ and $B$ are separated given a conditioning set $S \text{ with } A, B \notin S$ 
+    ($S$ may also be empty) if all paths between $A$ and $B$ are blocked, denoted:
+    $A\bowtie B|S$.
+\end{tcolorbox}
+This simply means that a path is blocked if no link is available between two variables.
+An example can be found in Figure \ref{fig:causalgraph}C where $X^1_t$ and $X^4_{t-1}$ have the path blocked.
+\begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=\textbf{Cusal Markov condition Definition}]
+    The joint distribution of a time series process $\bm{X}$ with
+    graph $G$ fulfills the Causal Markov Condition if and only if
+    for all $Y_t\in \bm{X}_t$ with parents $\mathcal{P}_{Y_t}$ in the graph\\
+    \begin{equation*}
+        \bm{X}^-_t\setminus\mathcal{P}_{Y_t}\bowtie Y_t | \mathcal{P}_{Y_t}\implies\bm{X}^-_t\setminus\mathcal{P}_{Y_t}\Perp Y_t | \mathcal{P}_{Y_t}
+    \end{equation*}
+    that is, from separation in the graph (since the parents $\mathcal{P}_{Y_t}$ separate$Y_t$ from $\bm{X}^-_t\setminus\mathcal{P}_{Y_t}$ in the graph) follows indipendence.
+\end{tcolorbox}
+This definition simply means that if there is no path between two variables those are indipendent (indicated with the symbol $\Perp$) or said differently if we know $\mathcal{P}_{Y_t}$ (parents of $Y_t$) no other variable influences $Y_t$.
+From this definition easily follows that Separation implies indipendence.
+
+\subsubsection*{Faithfulness}
+\begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=\textbf{Faithfulness Definition}]
+    The joint distribution of a time series process $\bm{X}$ with
+    graph $G$ fulfills the Faithfulness condition if and only if for all
+    disjoint subsets of nodes (or single nodes) $A, B, S \subset\mathcal{G}$ it
+    holds that
+    \begin{equation*}
+        X_a \Perp X_b|X_S\implies A\bowtie B|S
+    \end{equation*}
+    that is, from independence follows separation, which includes its logical contraposition
+    \begin{equation*}
+        A\cancel{\bowtie} B|S\implies X_a \cancel{\Perp} X_b|X_S
+    \end{equation*}
+    from connectedness follows dependence.
+\end{tcolorbox}
+This definition states that from Indipendence follows Separation.
+
+Intuitively, Faithfulness together with the Causal Markov Condition 
+allow us to conclude that a measured
+statistical dependency is actually due to some causal mechanism and, conversely,
+a measured independence implies that no direct causal mechanism exists.
+Both conditions are an important assumption for causal discovery algorithms that we'll discuss later.
+
+\subsubsection*{Causal Stationarity}
+\begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=\textbf{Definition}]
+    The time series process $\bm{X}$ with graph defined in \ref{fig:causalgraph}C is called causally stationary 
+    over a time index set $\mathcal{T}$ if and only if for all links $X^i_{t-\tau}\rightarrow X^j_\tau$ in the graph
+    \begin{equation*}
+        X^i_{t-\tau}\cancel{\Perp}X^j_\tau|\bm{X}^-\setminus\{X^i_{t-\tau}\}\text{ holds for all } t\in\mathcal{T}
+    \end{equation*}
+\end{tcolorbox}
+This constitutes actually a weaker form of stationarity than the common definition of stationarity in mean, 
+variance, spectral properties, or of the value of individual coefficients in a linear model.
+Intuitively this definition states that if I find a causal relation this should be time indipendent.\\
+
+A typical reason for non-stationarity are confounder variables, i.e., wrong assumption in causal sufficiency.
+
+\subsubsection*{Dependency (functional) type}
+To test conditional independence hypotheses $X \Perp Y \;|\; Z$ different test statistics can be utilized.
+These are typically based on making certain assumptions about the type of the underlying dependency structure.
+While classical statistical methods are often based on the assumption of linearity (which
+allows us to derive rigorous results), modern statistics, the physics community, and the recent 
+field of machine learn-ing have developed non-parametric or model-free methods that allow us to better 
+capture the nonlinear reality of many dynamical complex systems—at the cost of weaker theoretical results.
+Conditional independence testing can be classified into regression-based and model-free approaches.\\
+\begin{itemize}
+    \item \textbf{Regression Based}: Regression-based conditional independence tests of $X\Perp Y\;|\;Z$ are based on 
+    first regressing out the influence of Z from X and Y and then testing the dependence between the residuals.\\
+    We first fit a model assuming:
+    \begin{eqnarray*}
+        X=f_X(Z)+\epsilon_X\\
+        Y=f_Y(Z)+\epsilon_Y
+    \end{eqnarray*}
+    for centered variables $X, Y$ and independent and identicallynormally distributed $\epsilon_{X,Y}$.
+    Secondly, from the estimated functions $\hat{f}$, the residuals are formed as
+    \begin{eqnarray*}
+        r_X=X-\hat{f}_X(Z)\\
+        r_Y=Y-\hat{f}_Y(Z)
+    \end{eqnarray*}
+    Finally, the dependence between the residuals can be tested with different pairwise association tests (e.g., t-test).\\
+    \item{\textbf{Model Free}}: model-free methods directly test conditional independence.
+\end{itemize}
+
+\begin{figure}[H]
+    \includegraphics[width=0.9\textwidth]{img/depfunc.jpeg}
+    \centering
+    \caption{Illustration of applicability of different conditional independence methods(linear and non-parametric
+    regression-based and model-free) on different types of linear and nonlinear common driver models. Black arrows 
+    denote correctly identified causal links and dashed gray arrows indicate spurious links. The gray scatterplots 
+    with red fit line illustrate regressions of X and Y on Z and the black scatterplot the dependency between the 
+    residuals $r_X,r_Y$. The three-dimensional scatterplot with red cubes in the right column depicts the CMIknn test 
+    which is based on data-adaptive nearest-neighbor estimation (the cubes are smaller for denser regions).}
+\end{figure}
+
+Model-free regression generally works, but they are very data-hungry and computationally expensive.
+
+\subsection{Causal Discovery Algorithms}
+\begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=\textbf{Universal causal consistency Definition}]
+Denoted by $\mathcal{\hat{G}}_n$ the estimated graph of some causal estimator from a sample of a 
+distribution $P$ with sample size $n$ and by $\mathcal{G}$ the true causal graph. 
+Then a causal estimator is said to be universally consistent if $\hat{\mathcal{G}}_n$ 
+converges in probability to $\mathcal{G}$ for every distribution $P$,
+\begin{equation*}
+    \lim_{n\rightarrow\infty} Pr(\hat{\mathcal{G}}_n\ne\mathcal{G})=0
+\end{equation*}
+\end{tcolorbox}
+Consistency is an important property of causal methods that tells us whether the method provably 
+converges to the true causal graph in the limit of infinite sample size. That is, the probability of estimating 
+the wrong graph becomes arbitrarily small if enough data is available, for any distribution $P$ (hence “universal”).
+
+\subsubsection{FullCI Algorithm}
+This is the
