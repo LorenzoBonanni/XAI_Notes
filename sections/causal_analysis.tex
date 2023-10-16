@@ -308,7 +308,7 @@ Consistency is an important property of causal methods that tells us whether the
 converges to the true causal graph in the limit of infinite sample size. That is, the probability of estimating 
 the wrong graph becomes arbitrarily small if enough data is available, for any distribution $P$ (hence “universal”).
 
-\subsubsection{FullCI Algorithm}
+\subsection{FullCI Algorithm}
 This is the simples algorithm that one can come up with, it tests for conditional independence between each
 $X^i_{t-\tau}$ and $X^j_t$ conditioned on the entire past $\bm{X}_t^{(t-1,\;\ldots\;, t-\tau_{max})}$ excluding $X^i_{t-\tau}$.
 \begin{equation}
@@ -349,3 +349,35 @@ This algorithm has two main \textbf{\textcolor{Green}{advantages}}:
     \item The complexity is polynomial
 \end{itemize}
 While the main \textbf{\textcolor{Red}{drawback}} is that useless parents are added.
+
+\subsection{PC Algorithm}
+An alternative to the forward-backward scheme is the PC algorithm (named after its inventors Peter and Clark).
+The algorithm goes as follow:
+\begin{itemize}
+    \item Initialize $\hat{\mathcal{P}}(X^j_t)=(\bm{X_{t-1}}, \bm{X_{t-2}},\;\ldots\;\bm{X_{t-\tau_{max}}})$
+    \item 1st iteration (p=0): remove a variable if PC(p=0): $X^i_{t-\tau}\Perp X^j_{t}$, can be stated with significance.
+    \item p-th iteration (p>0): remove a variable if \textbf{any} of the significance tests fails for \\
+    $PC(p > 0):\;X^i_{t-\tau}\Perp X^j_{t}\;|\;S\quad \text{for any } S \text{ with } |S|=p,\quad S\subseteq\hat{\mathcal{P}}(X^j_t)\setminus\{X^i_{t-\tau}\}$
+\end{itemize}
+This algorithm compared to one showed before has the \advantage that reduces the dimensionality of parents iteratively.
+On the other hand we have the \drawback that we need to conduct more indipendence tests.
+
+\subsection{PCMCI Algorithm}
+A more recent approach that addresses some of the shortcomings of the PC algorithm above is PCMCI.
+
+PCMCI is a \textbf{two-step approach} which uses a version of the PC-algorithm only as a condition-selection step ($PC_1$ algorithm).\\
+
+\begin{enumerate}
+    \item Replace $PC\rightarrow PC_1$:
+    \begin{itemize}
+        \item At iteration $p$, do not iterate over $S$, but only consider \textbf{the most significant} $S$.\\
+        If the most significant is not a parent then remove all the other
+        \item Sort $P$ according to the significance value, then consider $S$ as the set of first $p$ parents
+    \end{itemize}
+    \item Momentary Conditional Indipendence (MCI): We also condition on the parents of the parent
+    \begin{eqnarray*}
+        MCI: X^i_{t-\tau}\Perp X^j_{t}\;|\;\hat{\mathcal{P}}(X^j_t)\setminus\{X^i_{t-\tau}\}, \hat{\mathcal{P}}(X^i_{t-\tau})\quad \forall X^i_{t-\tau}\in \bm{X}^-_t\\
+        \text{where } \bm{X}^-_t=(\bm{X}_{t-1}, \bm{X}_{t-2},\ldots,\bm{X}_{t-\tau})
+    \end{eqnarray*}
+\end{enumerate}
+This results in the \advantage that in the end we'll have fewer false (confounding) parents.
