@@ -157,3 +157,68 @@ Normal Form (CNF).
     \item \textbf{Normal form} corresponds to clauses (disjunctions and negations only).
     \item \textbf{CNF} corresponds to conjunction of clauses
 \end{itemize}
+
+Resolution Rule: $\inferrule{\{p, q\} \\\\ \{\lnot p,r\}}{\{q, r\}}$
+
+The planning problem can be reformulated as:
+\begin{enumerate}
+    \item Is the planning problem satisfiable (i.e., is there any feasible sequence of actions)?
+    \item Given initial conditions, goal and action rules, what is the next possible action sequence?
+\end{enumerate}
+
+Propositional Logic is not enougth:
+\begin{itemize}
+    \item we also need predicates (functions), not only atoms or variables. To solve this issue we need to intruduce \textbf{First Order Logic (FOL)}
+    \item We need to introduce time (one action per time step, or possibly temporal conditions on actions). To solve that we need to introduce \textbf{(Linear) Temporal Logic (LTL)}
+\end{itemize}
+
+\subsection{Inference in FOL}
+\begin{figure}[H]
+    \includegraphics[width=0.5\textwidth]{img/FOL.png}
+    \centering
+\end{figure}
+
+\textbf{Ground term}: a term which does not contain variables
+\begin{itemize}
+    \item move(A, B) NOT GROUND $\rightarrow$ no value to vars
+    \item move(room1, room2) GROUND $\rightarrow$ value to vars
+\end{itemize}
+
+\textbf{Substitution}: replacing a term with another (typically, a variable with a constant)
+
+$\inferrule{\forall v\;\alpha}{Subst(\{v/g\}, \alpha)}\quad \inferrule{\exists v\;\alpha}{Subst(\{v/k\}, \alpha)}$
+
+g = all possible constants (ground terms) for v\\
+k = skolem constant\\
+
+For example from the sentence $\exists x Crown(x)\land OnHead(x, Jhon)$ we can infer the sentence:
+$Crown(C_1)\land OnHead(C_1, Jhon)$
+
+\subsection{LTL}
+\begin{equation*}
+    \varphi \coloneqq T \;|\; p \;|\; \lnot\varphi \;|\; \varphi_1 \land \varphi_2 \;|\; \varphi_1 U \varphi_2 \;|\; X\varphi
+\end{equation*}
+Where $U$ is the Until symbol\\
+Where $X$ is the Next symbol\\
+
+\subsection{Logic for explainable agency}
+\begin{itemize}
+    \item Propositional logic gives the basic syntax and semantics for representing the planning problem
+    \item FOL adds hierarchical structure (classes and instances) of real world
+    \item LTL adds temporal structure
+\end{itemize}
+For our purpose this is enougth but if we have more complex problems we may need other stuff:
+\begin{itemize}
+    \item Stochastic planning domain
+    \begin{itemize}
+        \item Problabilistic logic
+        \item Markov logic networks
+    \end{itemize}
+    \item The addition of all this stuff might be an issue for complexity
+    \begin{itemize}
+        \item Decidability:\\
+        From PSPACE to EXPSPACE-complete with time\\
+        Potentially undecidable with stochasticity
+        \item Synthesis is 2EXPTIME-complete with LTL over finite traces
+    \end{itemize}
+\end{itemize}
