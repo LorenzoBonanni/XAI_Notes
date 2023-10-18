@@ -102,7 +102,7 @@ Now knowing that we are $at(room1)$ we can use our constraint to remove actions 
         \end{itemize}
     \end{itemize}
 \end{minipage}
-
+\singlespacing
 \vspace{0.5cm}
 Now by applying preconditions and constraints we found that the only feasible action is $move(room1, room2)$.
 Progating that action we can see that we reach the goal.
@@ -135,6 +135,7 @@ Progating that action we can see that we reach the goal.
         \end{itemize}
     \end{itemize}
 \end{minipage}
+\singlespacing
 \vspace{0.1cm}
 
 Which term may I infer? \textcolor{ForestGreen}{$at(room2)$}. This means that we reached the goal and so
@@ -148,4 +149,39 @@ $\{move(room1,room2)\}$ is a solution for this planning problem.
 Extended KB is contradictory.
 Absurdum $\rightarrow \{move(room1,room2)\}$ is ground and solves the planning problem
 
-What happens if we add Time?
+If we continue progating with the second Effect
+% What happens if we add Time?
+
+\begin{minipage}[t]{0.5\textwidth}
+    \setstretch{0.5}
+    \begin{itemize}
+        \item Rooms A, B with possible constant values room1, room2
+        \item Location (state) $at(A)$
+        \item Action predicate $move(A, B)$
+        \begin{itemize}
+            \item \textcolor{red}{Precondition: $move(A, B) \leftarrow at(A)$}
+            \item \textcolor{ForestGreen}{Effect 1 (post-cond.): $at(B) \leftarrow move(A, B)$}
+            \item \textcolor{Dandelion}{Effect 2: $not\;at(A) \leftarrow move(A, B)$}
+            \item \textcolor{blue}{Constraint: $move(A, B),\;A \ne B$}
+        \end{itemize}
+        \item Initial state: $at(room1)$
+        \item Goal state: $at(room2)$
+    \end{itemize}
+\end{minipage}
+\begin{minipage}[t]{0.8\textwidth}
+    \begin{itemize}
+        \item Start from the initial state $at(room1)$
+        \item Which variables can we substitute (ground) in $move(A, B)$?
+        \begin{itemize}
+            \item $\bm{move(room1, room2)}$
+            \item \textcolor{red}{\st{$move(room2, room1)$}}
+            \item \textcolor{blue}{\st{$move(room1, room1)$}}
+            \item \textcolor{red}{\st{$move(room2, room2)$}}
+        \end{itemize}
+    \end{itemize}
+\end{minipage}
+\singlespacing
+
+KB=$\{\underline{at(room1)}, at(room2), move(room1,room2), \underline{\textcolor{Dandelion}{not\;at(room1)}\}}$
+
+By doing so we reach an Absurdum inside out knowledge base. Which is a problem, to solve this we need to add time.
