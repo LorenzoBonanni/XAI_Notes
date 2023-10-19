@@ -15,6 +15,9 @@
 \usepackage{txfonts}
 \usepackage{mathpartir}
 \usepackage{soul}
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+\newcommand{\tick}{\textcolor{Green}{\ding{51}}}
+\newcommand{\cross}{\textcolor{Red}{\ding{55}}}
 \newcommand{\drawback}{\textbf{\textcolor{Red}{drawback }}}
 \newcommand{\advantage}{\textbf{\textcolor{Green}{advantage }}}
 
@@ -56,10 +59,10 @@
 \newpage
 \tableofcontents
 
-\include{sections/introduction}
-\include{sections/causal_analysis}
-\include{sections/causaldiscapp}
-\include{sections/explainable_agents}
+% \include{sections/introduction}
+% \include{sections/causal_analysis}
+% \include{sections/causaldiscapp}
+% \include{sections/explainable_agents}
 \include{sections/answer_set_programming}
 
 \end{document}
