@@ -16,12 +16,8 @@
 \usepackage{mathpartir}
 \usepackage{soul}
 \usepackage{pifont}% http://ctan.org/pkg/pifont
-\newcommand{\tick}{\textcolor{Green}{\ding{51}}}
-\newcommand{\cross}{\textcolor{Red}{\ding{55}}}
-\newcommand{\drawback}{\textbf{\textcolor{Red}{drawback }}}
-\newcommand{\advantage}{\textbf{\textcolor{Green}{advantage }}}
-\newcommand{\entails}{\models}
-
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 
 \hypersetup{
     colorlinks=true,
@@ -35,9 +31,21 @@
     outer=1.0cm,
     inner=2.0cm
 }
+\newcommand{\tick}{\textcolor{Green}{\ding{51}}}
+\newcommand{\cross}{\textcolor{Red}{\ding{55}}}
+\newcommand{\drawback}{\textbf{\textcolor{Red}{drawback }}}
+\newcommand{\advantage}{\textbf{\textcolor{Green}{advantage }}}
+\newcommand{\entails}{\models}
+\newcommand{\aspimply}{\;\text{:-}\;}
+\newcommand{\cstpl}[1]{\left\{\rule{0 cm}{#1}\right.}
+\newcommand{\cstpr}[1]{\left.\rule{0 cm}{#1}\right\}}
 \newcommand{\red}{\color{red}}
 \newcommand{\blue}{\color{blue}}
 \newcommand{\black}{\color{black}}
+\algnewcommand\algorithmicforeach{\textbf{for each}}
+\algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
+
+
 % Required for inserting images
 \setlength{\parindent}{0mm}
 \DeclareMathOperator{\EX}{\mathbb{E}}% expected value
@@ -59,12 +67,13 @@
 \maketitle
 \newpage
 \tableofcontents
-
-\include{sections/introduction}
-\include{sections/causal_analysis}
-\include{sections/causaldiscapp}
-\include{sections/explainable_agents}
-\include{sections/answer_set_programming}
+% \include{commands}
+% \include{sections/introduction}
+% \include{sections/causal_analysis}
+% \include{sections/causaldiscapp}
+% \include{sections/explainable_agents}
+% \include{sections/answer_set_programming}
 \include{sections/inductive_learning}
-
+\bibliographystyle{ieeetr} 
+\bibliography{ref}
 \end{document}

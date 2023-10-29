@@ -136,7 +136,7 @@ Contrary to the brave induction Positive examples should be entailed by \textbf{
 \textbf{any answer set}
 
 \subsection{Inductive learning of answer set programs (ILASP)}
-Given the previous definitions we can give the definion of Inductive learning of answer set programs which is a particular specialization
+Given the previous definitions we can give the definion of Inductive learning of answer set programs \cite{LAW2018110} which is a particular specialization
 of Learning from Entailment task.
 
 \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=\textbf{Definition}]
@@ -295,3 +295,135 @@ Going back to the Reinforcement Learning setting we stated at the beggining,
 in this setting we know only about the observations we get and so Negative examples cannot be easily built.
 
 \subsection{ILASP in practice}
+If we have a small domain with a few variables, enumerating the
+search space is not a problem. The problem araises when we face a realistic domain
+which may have hundreds of variables, in that case enumerating becames infeasible.
+
+Fortunately in ILASP the search space does not need to be specified explicitely, 
+the language contains compact structures to build the search space automatically (called Mode Bias).
+\begin{itemize}
+    \item $\#modeh(move(A,B,T)).\rightarrow\; move(A,B,T)$ may occur in the head
+    \item $\#modeha(move(A,B,T)).\rightarrow\; move(A,B,T)$ may occur in the head as an aggregate
+    \item $\#modeb(N, at(A, T), (positive)).\rightarrow\; at(A,T)$ may occur in the body $N$ times, but only positive (no NAF)
+    \item $\#modeb(1, adjacent(A,B), (symmetric)).\rightarrow$ If $adjacent(A,B)$ is present in the body (just once), then axioms 
+    with $adjacent(B,A)$ are not generated
+\end{itemize}
+
+The ILASP problem is equivalent to a meta-level ASP program.
+Starting from background knowledge($B$), search space($S_M$) and positive examples($E^+$).
+\begin{minipage}[t]{0.2\textwidth}
+    \begin{equation*}
+        B=\bigl\{p\aspimply not\;q\bigr\}
+    \end{equation*}
+    \begin{equation*}
+            E^+=\Biggl\{ 
+                \begin{array}{l}
+                    e^1: \langle\{p\},\{q\}\rangle,\\
+                    e^2: \langle\{q\},\{p\}\rangle
+                \end{array}
+            \Biggr\}
+    \end{equation*}
+    \begin{equation*}
+        S_M=\Biggl\{ 
+            \begin{array}{l}
+                1: q.\\
+                2: q\aspimply\;not\;p .
+            \end{array}
+        \Biggr\}
+    \end{equation*}
+\end{minipage}
+\begin{minipage}[t]{0.7\textwidth}
+    \begin{equation*}
+        P=\cstpl{3.1cm}
+            \begin{array}{l}
+                \text{\%B}\\
+                1: as(1).\quad as(2).\\
+                2: in\_as(p, AS\_ID)\aspimply not\;in\_as(q, AS\_ID),as(AS\_ID).\\\\
+                
+                \text{\%S}_M\\
+                3: 0\;\{in\_h(1), in\_h(2)\}\;2\\
+                4: in\_as(q, AS\_ID)\aspimply as(AS\_ID), in\_h(1).\\
+                5: in\_as(q, AS\_ID)\aspimply as(AS\_ID),not\;in\_as(p, AS\_ID), in\_h(2).\\\\
+                
+                \text{\%Examples}\\
+                6:cov(1)\aspimply in\_as(p, 1),not\;in\_as(q, 1)\\
+                7:cov(2)\aspimply in\_as(q, 2),not\;in\_as(p, 2)\\
+                8:\aspimply not\;cov(1)\\
+                9:\aspimply not\;cov(2)
+            \end{array}
+        \cstpr{3.1cm}
+    \end{equation*}
+\end{minipage}\\
+
+First you define two dummy variables ($as(1), as(2)$) representing two Answer Sets(one for each example).
+Then you represent the background knowledge with the $is\_as$ predicates which states that
+if an axiom($q$) is not in an answer set with id $AS\_ID$ then the axiom $p$ must be in 
+the same answer set.
+
+The Search Spaces first states that from 0 to 2 hypotesis can be true then we define the two hypotesis,
+the first states that if I am in Hypotesis 1 then I can imply $q$, the second is very similar, it states that
+if I am in Hypotesis 2 and $p$ in not in the aswer set ($AS\_ID$) then I can imply ($q$).
+
+Then we have the examples:\\
+if I have the first example covered then $p$ must be in the answer set and $q$ not.\\
+the second example is similar to example 1 with just p and q swapped.
+The result of this program (i.e the answer set) will tell us the hypotesis.
+
+\begin{algorithm}[H]
+    \caption{CDILP(T)}
+    \begin{algorithmic}[1]  
+        \Procedure{CDILP}{T}
+        \State $CC=\emptyset$;
+        \State $solve\_result = hypotesis\_search(CC);$
+        \While{$solve\_result\ne nil$}
+        \State $\langle H,U,s\rangle=solve\_result;$
+        \State $ce=counterexample\_search(solve\_result, T);$
+        \If{$ce==nil$}
+        \State \Return $H$;
+        \Else
+        \State $F=conflict\_analysisis(ce,H,T)$;
+        \State $CC.insert(\langle ce, F\rangle)$;
+        \State $prop\_egs=propagate\_constraints(F,T)$;
+        \textcolor{Blue}{
+            \ForEach{$e\in prop\_egs$}
+            \State $CC.insert(\langle e, F\rangle)$;
+            \EndFor
+            \State $solve\_result = hypotesis\_search(CC);$
+        }
+        \EndIf
+        \EndWhile
+        \State\Return UNSATISFIABLE;
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+ILASP task $T$ can be solved with conflict-driven constraint learning (CDCL) \cite{law_2023}.
+The algorithm goes as follow:
+\begin{enumerate}
+    \item We define in the the set of coverage constraints ($CC$), 
+    a coverage constraint is a tuple composed of an example ($e$ that must be
+    covered by $H \cup B$) and a formula ($F$) which must be in $H$
+    to cover $e$. (i.e $H \cup B \;\cancel{\entails}\; e$ but $H \cup B \cup F \;\entails\; e$).
+    \item At the beginning this Procedure we assume that our ASP meta-program does not have any 
+    example and we compute an hypotesis ($hypotesis\_search(CC)$), so we solve the program.
+    \item Once we solved the program we obtain the shortest Hypotesis ($H$), the set of covered 
+    examples($U$) and the score which is the lenght of the hypotesis ($s=|H|$) used to find the hypotesis.
+    \item Then we search for a counterexample, in the remaining list of examples, find one
+    which does not sastisfy current $solve\_result$ by using an heuristic \cite{law_russo_broda_2016}.
+    \item Then we have two options
+    \begin{enumerate}
+        \item I don't find any counterexample I simply return the hypotesis
+        \item Otherwise I try to build the coverage constraints (i.e I look for a formula 
+        $F$ which covers the counterexample if added to the hypotesis).
+    \end{enumerate}
+    \item Then we add the formula and the counterexample to the list of coverage constraints and 
+    we perform another search for the hypotesis and iterate.
+\end{enumerate}
+Note the \textcolor{Blue}{blue} part can be ignored for the sake of this course since it is needed for or more
+complex learning tasks (e.g., learning under uncertainty).
+
+Solving the meta-level ASP program may be complex (many ground atoms), depending on:
+\begin{itemize}
+    \item Number of examples
+    \item Size of search space
+\end{itemize}
