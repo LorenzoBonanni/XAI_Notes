@@ -17,3 +17,163 @@ One of them is the distinction between \textbf{Intrinsic and Post hoc} methods.
 \end{itemize}
 
 Result of the various interpretation methods can be roughly differentiated according to their results:
+\begin{itemize}
+    \item \textbf{Feature summary statistic} $\rightarrow$ any interpretation methods provide summary 
+    statistics for each feature. Some methods return a single number per feature, such as feature importance, 
+    or a more complex result, such as the pairwise feature interaction strengths, which consist of a number 
+    for each feature pair. 
+
+    \item \textbf{Feature summary visualization} $\rightarrow$ Most of the feature summary statistics can also be visualized. 
+    Some feature summaries are actually only meaningful if they are visualized and a table would be a wrong choice. 
+    The partial dependence of a feature is such a case. 
+    Partial dependence plots are curves that show a feature and the average predicted outcome. 
+    The best way to present partial dependences is to actually draw the curve instead of printing the coordinates.
+
+    \item \textbf{Model internals} $\rightarrow$ The interpretation of intrinsically interpretable models falls into this category. 
+    Examples are the weights in linear models or the learned tree structure (the features and thresholds used for the splits) 
+    of decision trees. The lines are blurred between model internals and feature summary statistic in, for example, linear models, 
+    because the weights are both model internals and summary statistics for the features at the same time. Another method that 
+    outputs model internals is the visualization of feature detectors learned in convolutional neural networks. Interpretability 
+    methods that output model internals are by definition model-specific.
+
+    \item \textbf{Data point} $\rightarrow$  This category includes all methods that return data points (already existent or newly created) 
+    to make a model interpretable. One method is called counterfactual explanations. To explain the prediction of a data instance, the method 
+    finds a similar data point by changing some of the features for which the predicted outcome changes in a relevant way (e.g. a flip in the 
+    predicted class). Another example is the identification of prototypes of predicted classes. To be useful, interpretation methods that output 
+    new data points require that the data points themselves can be interpreted. This works well for images and texts, but is less useful for tabular 
+    data with hundreds of features.
+
+    \item \textbf{Surrogate models} $\rightarrow$ One solution to interpreting black box models is to approximate them (either globally or locally) with an interpretable model. 
+    The interpretable model itself is interpreted by looking at internal model parameters or feature summary statistics.
+\end{itemize}
+
+Another distinction is on the applicability of the Explainablility tecniques:
+\begin{itemize}
+    \item \textbf{Model-specific} $\rightarrow$ Model-specific interpretation tools are limited to specific model classes. Some examples include: 
+    \begin{itemize}
+        \item \textbf{weights statistics in Linear Models}: the interpretation of intrinsically interpretable models is always model-specific (by definition)
+        \item \textbf{Tools} that only work for the \textbf{interpretation of specific models} e.g. neural networks
+    \end{itemize}
+    \item \textbf{Model-agnostic} $\rightarrow$ Model-agnostic tools can be used on any machine learning model and are applied after the model has been trained (post hoc). 
+    These agnostic methods usually work by analyzing feature input and output pairs. By definition, these methods cannot have access to model internals such as weights or 
+    structural information.
+\end{itemize}
+
+The final distinction is onto what the explainability method explains, to this regard there two distrinctions:
+\begin{itemize}
+    \item \textbf{Local models} $\rightarrow$ explain individual predictions
+    \item \textbf{Global models} $\rightarrow$ summarize the behavior of the model across the data sample
+\end{itemize}
+
+\subsection{Algorithm transparency}
+Algorithm transparency is about how the algorithm learns a model from the data and what kind of relationships it can learn. 
+If you use convolutional neural networks to classify images, you can explain that the algorithm learns edge detectors and 
+filters on the lowest layers. This is an understanding of how the algorithm works, but not for the specific model that is 
+learned in the end, and not for how individual predictions are made. Algorithm transparency only requires knowledge of the 
+algorithm and not of the data or learned model.\\
+
+Algorithms such as the least squares method for linear models are well studied and understood. 
+They are characterized by a high transparency. Deep learning approaches (pushing a gradient 
+through a network with millions of weights) are less well understood and the inner workings 
+are the focus of ongoing research. They are considered less transparent.
+This course focuses on model interpretability and not algorithm transparency.
+
+\subsection{Types of (interpretability) explainability}
+\subsubsection{Global, Holistic Model Interpretability}
+\textit{How does the trained model make predictions?}\\
+
+This is a very difficult question for a complex model requiring the global model output, the trained
+model, knowledge of the algorithm and the data.
+In a sense, this means being able to follow step by step the reasoning of the model in the specific
+considered instance. For complex models this is far from human ability to manage the corresponding
+amount of information. Any model that exceeds a handful of parameters or weights is unlikely to fit 
+into the short-term memory of the average human. 
+I argue that you cannot really imagine a linear model with 5 features, because it would mean drawing 
+the estimated hyperplane mentally in a 5-dimensional space. Any feature space with more than 3 dimensions 
+is simply inconceivable for humans. Usually, when people try to comprehend a model, they consider only 
+parts of it, such as the weights in linear models.
+
+\subsubsection{Global model interpretability on a modular level}
+\textit{How do parts of the model affect predictions?}\\
+
+A Naive Bayes model with many hundreds of features would be too big for me and you to keep in our working memory. 
+And even if we manage to memorize all the weights, we would not be able to quickly make predictions for new data points. 
+In addition, you need to have the joint distribution of all features in your head to estimate the importance of 
+each feature and how the features affect the predictions on average. An impossible task. But you can easily understand 
+a single weight. While global model interpretability is usually out of reach, there is a good chance of understanding 
+at least some models on a modular level.
+
+Not all models are interpretable at a parameter level. For linear models, the interpretable parts are the weights, 
+for trees it would be the splits (selected features plus cut-off points) and leaf node predictions. Linear models, 
+for example, look like as if they could be perfectly interpreted on a modular level, but the interpretation of a single 
+weight is interlocked with all other weights. The interpretation of a single weight always comes with the footnote that 
+the other input features remain at the same value, which is not the case with many real applications.
+
+\newpage
+\subsubsection{Local Interpretability for a Single Prediction}
+\textit{Why did the model make a certain prediction for an instance?}\\
+
+You can zoom in on a single instance and examine what the model predicts for this input, and explain why. If you look at an 
+individual prediction, the behavior of the otherwise complex model might behave more pleasantly. Locally, the prediction 
+might only depend linearly or monotonically on some features, rather than having a complex dependence on them. For example, 
+the value of a house may depend nonlinearly on its size. But if you are looking at only one particular 100 square meters house, 
+there is a possibility that for that data subset, your model prediction depends linearly on the size.
+
+\subsubsection{Local Interpretability for a Group of Predictions}
+\textit{Why did the model make specific predictions for a group of instances?}\\
+
+Model predictions for multiple instances can be explained either with global model interpretation methods 
+(on a modular level) or with explanations of individual instances. The global methods can be applied by taking the group of instances, 
+treating them as if the group were the complete dataset, and using the global methods with this subset. The individual explanation methods can be used 
+on each instance and then listed or aggregated for the entire group.
+
+\subsection{Evaluation of (interpretability) explainability}
+There is no real consensus about what interpretability is in machine learning. Nor is it clear how to measure it. But there is some initial research on 
+this and an attempt to formulate some approaches for evaluation, as described in the following section.\\
+
+\cite{DoshiVelez2017TowardsAR} propose three main levels for the evaluation of interpretability:
+\begin{itemize}
+    \item \textbf{Application level} evaluation (real task) $\rightarrow$ relies on subjective evaluation by a pool of experts
+    of the considered task.
+    \item \textbf{Human level} evaluation (simple task) $\rightarrow$ relies on a general pool of subjects, the drawback is that it is only applicable to
+    general features and tasks but on the other side is less expensive compared to the previous.
+    \item \textbf{Function level} evaluation (proxy task) $\rightarrow$ relies on ad-hoc proxies that provide an objective
+    assessment of the attribute of interest
+\end{itemize}
+
+\subsection{Properties of Explanations}
+We take a closer look at the properties of explanation methods and explanations. These properties can be used to judge how good an explanation method or explanation is. 
+It is not clear for all these properties how to measure them correctly, so one of the challenges is to formalize how they could be calculated.
+\subsubsection{Properties of Explanation Methods}
+\begin{itemize}
+    \item \textbf{Expressive power} $\rightarrow$ language used by the method to describe the explanation (e.g. if-then,
+    decision tree, linear model etc...)
+    \item \textbf{Translucency} $\rightarrow$ describes how much the explanation method relies on looking into the machine learning model, like its parameters. 
+    For example, explanation methods relying on intrinsically interpretable models like the linear regression model (model-specific) are highly translucent. 
+    Methods only relying on manipulating inputs and observing the predictions have zero translucency.
+    \item \textbf{Portability} $\rightarrow$ describes the range of machine learning models with which the explanation method can be used. Methods with a low translucency 
+    have a higher portability because they treat the machine learning model as a black box. Surrogate models might be the explanation method with the highest portability. 
+    Methods that only work for e.g. recurrent neural networks have low portability.
+    \item \textbf{Algorithmic Complexity} $\rightarrow$ describes the computational complexity of the method that generates the explanation. This property is important to consider when 
+    computation time is a bottleneck in generating explanations.
+\end{itemize}
+
+\subsubsection{Properties of Individual Explanations}
+\begin{itemize}
+    \item \textbf{Accuracy} $\rightarrow$ How well does an explanation predict unseen data? High accuracy is especially important if the explanation is used for predictions in place of the machine learning model. 
+    Low accuracy can be fine if the accuracy of the machine learning model is also low, and if the goal is to explain what the black box model does.
+    \item \textbf{Fidelity} $\rightarrow$ How well does the explanation approximate the prediction of the black box model?  High fidelity is one of the most important properties of an explanation, because an explanation 
+    with low fidelity is useless to explain the machine learning model. Accuracy and fidelity are closely related. If the black box model has high accuracy and the explanation has high fidelity, the explanation also has 
+    high accuracy. Some explanations offer only local fidelity, meaning the explanation only approximates well to the model prediction for a subset of the data (e.g. local surrogate models) or even for only an individual 
+    data instance (e.g. Shapley Values).
+    \item \textbf{Consistency} $\rightarrow$ How much does an explanation differ between models that have been trained on the same task and that produce similar predictions? I find this property somewhat tricky, since the 
+    two models could use different features, but get similar predictions (also called “Rashomon Effect”). In this case a high consistency is not desirable because the explanations have to be very different. High consistency 
+    is desirable if the models really rely on similar relationships.
+    \item \textbf{Stability} $\rightarrow$ How similar are the explanations for similar instances? While consistency compares explanations between models, stability compares explanations between similar instances for a fixed model.
+    \item \textbf{Comprehensibility} $\rightarrow$ How well do humans understand the explanations? This looks just like one more property among many, but it is the elephant in the room. Difficult to define and measure, but extremely important to get right.
+    \item \textbf{Certainty} $\rightarrow$ Does the explanation reflect the certainty of the machine learning model? Many machine learning models only give predictions without a statement about the models confidence that the prediction is correct.
+    \item \textbf{Degree of Importance} $\rightarrow$ How well does the explanation reflect the importance of features or parts of the explanation?
+    \item \textbf{Novelty} $\rightarrow$ Does the explanation reflect whether a data instance to be explained comes from a “new” region far removed from the distribution of training data? In such cases, the model may be inaccurate and the explanation may be useless. 
+    The concept of novelty is related to the concept of certainty. The higher the novelty, the more likely it is that the model will have low certainty due to lack of data.
+    \item \textbf{Representativeness} $\rightarrow$ How many instances does an explanation cover? Explanations can cover the entire model (e.g. interpretation of weights in a linear regression model) or represent only an individual prediction (e.g. Shapley Values).
+\end{itemize}
