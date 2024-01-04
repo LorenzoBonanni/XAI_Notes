@@ -1,0 +1,19 @@
+\section{Taxonomy of Interpretability Methods}
+Methods for machine learning interpretability can be classified according to various criteria.
+One of them is the distinction between \textbf{Intrinsic and Post hoc} methods.
+\begin{itemize}
+    \item \textbf{Intrinsic} $\rightarrow$ Intrinsically explainable models are
+    self-explaining. Do not require post-hoc methods though these could be
+    applied. Those methods refers to machine learning models that are considered interpretable 
+    due to their simple structure, such as short decision trees or sparse linear models.
+
+    \item \textbf{Post hoc} $\rightarrow$ are methods that analyze the model after training and usually model agnostic.
+    Assign values to features (attributions, relevance, importance) expressing the impact of the features on the models outcomes.
+    Those tecniques can be subdived into two main categories:
+    \begin{itemize}
+        \item \textbf{Feature importance methods} like for example SHAP, LIME and feature permutation
+        \item \textbf{Feature visualization methods} like gradient-based methods
+    \end{itemize}
+\end{itemize}
+
+Result of the various interpretation methods can be roughly differentiated according to their results:

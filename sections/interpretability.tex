@@ -1,0 +1,71 @@
+\part{Interpretable Machine Learning - Gloria Menegaz}
+\section{Interpretability}
+
+It is difficult to (mathematically) define interpretability. A (non-mathematical) definition of interpretability by \cite{miller2019explanation} is:
+"\textbf{Interpretability is the degree to which a human can understand the cause of a decision}".
+
+Another one from \cite{kim2016examples} is: "\textbf{Interpretability is the degree to which a human can consistently predict the model's result}".
+The higher the interpretability of a machine learning model, the easier it is for someone to comprehend
+why certain decisions or predictions have been made. A model is better interpretable than another model 
+if its decisions are easier for a human to comprehend than decisions from the other model. 
+I will use both the terms interpretable and explainable interchangeably.
+\subsection{Importance of Interpretability}
+If a machine learning model performs well, why do we not just trust the model and ignore why it made a 
+certain decision? “The problem is that a single metric, such as classification accuracy, is an incomplete 
+description of most real-world tasks.”\\
+
+Let us dive deeper into the reasons why interpretability is so important.
+When it comes to predictive modeling, you have to make a trade-off: 
+Do you just want to know what is predicted? For example, the probability that 
+a customer will churn or how effective some drug will be for a patient. 
+Or do you want to know why the prediction was made and possibly pay for the interpretability 
+with a drop in predictive performance? In some cases, you do not care why a decision was made, 
+it is enough to know that the predictive performance on a test dataset was good. But in other cases, 
+knowing the `why` can help you learn more about the problem, the data and the reason why a model might fail. 
+Some models may not require explanations because they are used in a low-risk environment, meaning a mistake 
+will not have serious consequences, (e.g. a movie recommender system) or the method has already 
+been extensively studied and evaluated (e.g. optical character recognition). 
+The need for interpretability arises from an incompleteness in problem formalization, which means that 
+for certain problems or tasks it is not enough to get the prediction (the what). 
+The model must also explain how it came to the prediction (the why), because a correct prediction 
+only partially solves your original problem.\\
+
+Machine learning models take on real-world tasks that require safety measures and testing. 
+Imagine a self-driving car automatically detects cyclists based on a deep learning system. 
+You want to be 100\% sure that the abstraction the system has learned is error-free, because 
+running over cyclists is quite bad. An explanation might reveal that the most important 
+learned feature is to recognize the two wheels of a bicycle, and this explanation helps 
+you think about edge cases like bicycles with side bags that partially cover the wheels.\\
+
+By default, machine learning models pick up biases from the training data. 
+This can turn your machine learning models into racists that discriminate against 
+underrepresented groups. Interpretability is a useful debugging tool for detecting 
+bias in machine learning models. It might happen that the machine learning model you have 
+trained for automatic approval or rejection of credit applications discriminates against a 
+minority that has been historically disenfranchised. 
+Your main goal is to grant loans only to people who will eventually repay them. 
+The incompleteness of the problem formulation in this case lies in the fact that 
+you not only want to minimize loan defaults, but are also obliged not to discriminate 
+on the basis of certain demographics. This is an additional constraint that is part of 
+your problem formulation (granting loans in a low-risk and compliant way) that is not 
+covered by the loss function the machine learning model was optimized for.\\
+
+Machine learning models can only be debugged and audited when they can be interpreted. 
+Even in low risk environments, such as movie recommendations, the ability to interpret 
+is valuable in the research and development phase as well as after deployment.
+Later, when a model is used in a product, things can go wrong. \textbf{An interpretation 
+for an erroneous prediction helps to understand the cause of the error}.
+It delivers a direction for how to fix the system. Consider an example of a 
+husky versus wolf classifier that misclassifies some huskies as wolves.
+
+\begin{figure}[H]
+    \includegraphics[width=0.5\textwidth]{img/wolf_vs_husky.png}
+    \centering
+\end{figure}
+
+Using interpretable machine learning methods, you would find that the 
+misclassification was due to the snow on the image. 
+The classifier learned to use snow as a feature for classifying images as “wolf”, 
+which might make sense in terms of separating wolves from huskies in the training 
+dataset, but not in real-world use.
+
