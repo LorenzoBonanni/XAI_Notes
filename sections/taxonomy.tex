@@ -177,3 +177,37 @@ It is not clear for all these properties how to measure them correctly, so one o
     The concept of novelty is related to the concept of certainty. The higher the novelty, the more likely it is that the model will have low certainty due to lack of data.
     \item \textbf{Representativeness} $\rightarrow$ How many instances does an explanation cover? Explanations can cover the entire model (e.g. interpretation of weights in a linear regression model) or represent only an individual prediction (e.g. Shapley Values).
 \end{itemize}
+
+\subsection{Good Explanation}
+An explanation is the answer to a why question \cite{miller2017explainable}:
+\begin{itemize}
+    \item Why did not the treatment work on the patient?
+    \item Why was my loan rejected?
+    \item Why have we not been contacted by alien life yet?
+\end{itemize}
+\subsubsection{What is a Good Explanation?}
+Humans usually do not ask why a certain prediction was made, but why this prediction was made instead of another prediction. \textbf{We tend to think in counterfactual cases} \cite{Lipton_1990},
+i.e. “How would the prediction have been if input X had been different?”. For a house price prediction, the house owner might be interested in why the predicted price was high 
+compared to the lower price they had expected. If my loan application is rejected, I do not care to hear all the factors that generally speak for or against a rejection. I am 
+interested in the factors in my application that would need to change to get the loan. I want to know the contrast between my application and the would-be-accepted version of 
+my application. \textbf{The best explanation is the one that highlights the greatest difference between the object of
+interest and the reference object}. Creating contrastive explanations is application-dependent because it requires a point of reference for comparison.
+
+\subsubsection{Characteristics}
+\begin{itemize}
+    \item \textbf{Selected}: People do not expect explanations that cover the actual and complete list of causes of an event. Make the explanation very short, give only 1 to 3 reasons, even if the world is more complex.
+    \item \textbf{Social}: They are part of a conversation or interaction between the explainer and the receiver of the explanation. The social context determines the content and nature of the explanations. If I wanted to explain to a technical person why digital cryptocurrencies are worth so much, I would say things like: “The decentralized, distributed, blockchain-based ledger, which cannot be controlled by a central entity, resonates with people who want to secure their wealth, which explains the high demand and price.” But to my grandmother I would say: “Look, Grandma: Cryptocurrencies are a bit like computer gold. People like and pay a lot for gold, and young people like and pay a lot for computer gold.”
+    \item \textbf{Focus on the abnormal}: People focus more on abnormal causes to explain events \cite{Kahneman1982TheSH}. These are causes that had a small probability but nevertheless happened. The elimination of these abnormal causes would have greatly changed the outcome (counterfactual explanation). Humans consider these kinds of “abnormal” causes as good explanations. 
+    \item \textbf{Truthful}: Good explanations prove to be true in reality (i.e. in other situations). But disturbingly, this is not the most important factor for a “good” explanation. The explanation should predict the event as truthfully as possible, which in machine learning is sometimes called \textbf{fidelity}.
+    \item \textbf{Consistent}: Good explanations are consistent with prior beliefs of the explainee. Humans tend to ignore information that is inconsistent with their prior beliefs. This effect is called confirmation bias \cite{Nickerson1998}
+    Explanations are not spared by this kind of bias. People will tend to devalue or ignore explanations that do not agree with their beliefs. The set of beliefs varies from person to person, but there are also group-based prior beliefs such as political worldviews.
+    \textbf{This could hide novel findings that are still not reported in the literature or available knowledge.}
+    \item \textbf{General and probable}: A cause that can explain many events is very general and could be considered a good explanation. Note that this contradicts the claim that abnormal causes make good explanations. As I see it, abnormal causes beat general causes. Abnormal causes are by definition rare in the given scenario. In the absence of an abnormal event, a general explanation is considered a good explanation. Generality can easily be measured by the feature’s support, which is the number of instances to which the explanation applies divided by the total number of instances.
+\end{itemize}
+
+\subsection{Datasets}
+It is important to use standard datasets for the results to be comparable with others.
+It is a wise choice to start with simple datasets facilitating the interpretation of the results as
+well as their soundness.
+The choice of the dataset is task-dependent meaning that different types of data are needed
+for experimenting classification and regression, respectively, getting the most out of it.
