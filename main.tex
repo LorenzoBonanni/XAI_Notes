@@ -1,5 +1,6 @@
 \documentclass{article}
 \usepackage{graphicx} 
+\usepackage{enumitem}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath, amsfonts, amssymb, bm}
 \usepackage{graphicx, geometry, wrapfig, float, multicol, mathtools, array, csquotes, lscape, setspace}
@@ -45,7 +46,6 @@
 \algnewcommand\algorithmicforeach{\textbf{for each}}
 \algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
 
-
 % Required for inserting images
 \setlength{\parindent}{0mm}
 \DeclareMathOperator{\EX}{\mathbb{E}}% expected value
@@ -68,14 +68,14 @@
 \newpage
 \tableofcontents
 
-% \include{sections/introduction}
-% \include{sections/causal_analysis}
-% \include{sections/causaldiscapp}
-% \include{sections/explainable_agents}
-% \include{sections/answer_set_programming}
-% \include{sections/inductive_learning}
-% \include{sections/interpretability}
-% \include{sections/taxonomy}
+\include{sections/introduction}
+\include{sections/causal_analysis}
+\include{sections/causaldiscapp}
+\include{sections/explainable_agents}
+\include{sections/answer_set_programming}
+\include{sections/inductive_learning}
+\include{sections/interpretability}
+\include{sections/taxonomy}
 \include{sections/interpretable_models}
 \bibliographystyle{ieeetr} 
 \bibliography{ref}

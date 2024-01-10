@@ -27,6 +27,10 @@ Various methods can be used to estimate the optimal weight. The ordinary least s
 Estimated weights come with confidence intervals. A confidence interval is a range for the weight estimate that covers the “true” weight with a certain confidence. For example, a 95\% confidence interval for a weight of 
 2 could range from 1 to 3. The interpretation of this interval would be: If we repeated the estimation 100 times with newly sampled data, the confidence interval would include the true weight in 95 out of 100 cases, given 
 that the linear regression model is the correct model for the data.
+\newif\ifgooditem
+\gooditemtrue
+\newcommand\gooditem{\gooditemtrue\item}
+\newcommand\baditem{\gooditemfalse\item}
 
 Whether the model is the “correct” model depends on whether the relationships in the data meet certain assumptions:
 \begin{itemize}
@@ -103,3 +107,41 @@ The information of the weight table (weight and variance estimates) can be visua
     \includegraphics[width=0.5\textwidth]{img/linear-weights-plot-1.jpeg}
     \centering
 \end{figure}
+
+The problem with the weight plot is that the features are measured on different scales.
+You can make the estimated weights more comparable by scaling the features (zero mean and standard deviation of
+one) before fitting the linear model.\\
+
+\textbf{Effect plot}
+The weights of the linear regression model can be more meaningfully analyzed when they are multiplied by the actual feature values.
+It is also important to know the distribution of your feature in the data, because if you have a very low variance, it means that almost 
+all instances have similar contribution from this feature. 
+The effect plot can help you understand how much the combination of weight and feature contributes to the predictions in your data. Start by calculating the effects, 
+which is the weight per feature times the feature value of an instance:
+\begin{equation*}
+    \text{effect}_{j}^{(i)}=w_{j}x_{j}^{(i)}
+\end{equation*}
+The effects can be visualized with boxplots. The box in a boxplot contains the effect range for half of the data (25\% to 75\% effect quantiles). 
+The vertical line in the box is the median effect, i.e. 50\% of the instances have a lower and the other half a higher effect on the prediction. The dots are outliers, defined as points that are more than 1.5 * IQR (interquartile range, that is, the difference between the first and third quartiles) above the third quartile, or less than 1.5 * IQR below the first quartile. 
+The two horizontal lines, called the lower and upper whiskers, connect the points below the first quartile and above the third quartile that are not outliers. If there are no outliers the whiskers will extend to the minimum and maximum values.
+\begin{figure}[H]
+    \includegraphics[width=0.5\textwidth]{img/linear-effects-1.jpeg}
+    \centering
+\end{figure}
+
+\subsubsection{Explain Individual Predictions}
+How much has each feature of an instance contributed to the prediction? 
+This can be answered by computing the effects for this instance. That is multiplying the feature values for this instance times the corresponding weights.
+We add these individual effects as crosses to the effect plot, which shows us the distribution of the effects in the data. This allows us to compare the individual effects with the distribution
+of effects in the data.
+\begin{figure}[H]
+    \includegraphics[width=0.5\textwidth]{img/linear-effects-single-1.jpeg}
+    \centering
+\end{figure}
+\subsubsection{Do Linear Models Create Good Explanations?}
+Judging by the attributes that constitute a good explanation, as presented previously, linear models do not create the best explanations. 
+% https://tex.stackexchange.com/a/101296
+% \begin{itemize}[label={\ifgooditem\color{green}\else\color{red}\fi\textbullet}]
+% \gooditem aaaa buono
+% \baditem aaaa cattivo
+% \end{itemize}
