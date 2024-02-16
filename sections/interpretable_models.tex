@@ -141,7 +141,115 @@ of effects in the data.
 \subsubsection{Do Linear Models Create Good Explanations?}
 Judging by the attributes that constitute a good explanation, as presented previously, linear models do not create the best explanations. 
 % https://tex.stackexchange.com/a/101296
-% \begin{itemize}[label={\ifgooditem\color{green}\else\color{red}\fi\textbullet}]
-% \gooditem aaaa buono
-% \baditem aaaa cattivo
-% \end{itemize}
+\begin{itemize}[label={\ifgooditem\color{green}\else\color{red}\fi\textbullet}]
+\gooditem Contrastive (allows to compare the contributions of different features)
+\gooditem Simple
+\gooditem Generate truthful explanations if it fits well the data
+\baditem Applicable only when linear relations hold
+\baditem Do not directly account for feature interactions
+\baditem Not suitable for multicollinear features
+\baditem Standard error increases with the number of features
+\end{itemize}
+
+\subsubsection{Lasso Regression}
+Lasso stands for "least absolute shrinkage and selection operator" this tecnique is an automatic and convenient way to introduce sparsity (i.e use few features) into the linear regression model.
+When applied in a linear regression model, performs feature selection and regularization of the selected feature weights.
+Let us consider the minimization problem that the weights optimize:
+\begin{equation*}
+    min_{\boldsymbol{\beta}}\left(\frac{1}{n}\sum_{i=1}^n(y^{(i)}-x_i^T\boldsymbol{\beta})^2\right)
+\end{equation*}
+Lasso adds a term to this optimization problem.
+\begin{equation*}
+    min_{\boldsymbol{\beta}}\left(\frac{1}{n}\sum_{i=1}^n(y^{(i)}-x_{i}^T\boldsymbol{\beta})^2+\lambda||\boldsymbol{\beta}||_1\right)
+\end{equation*}
+The term $||\boldsymbol{\beta}||_1$, the L1-norm of the feature vector, leads to a penalization of large weights. 
+Since the L1-norm is used, many of the weights receive an estimate of 0 and the others are shrunk.
+The parameter lambda ($\lambda$) controls the strength of the regularizing effect and is usually tuned by cross-validation. 
+Especially when lambda is large, many weights become 0.
+
+\subsubsection{Other methods for sparsity in linear models}
+A wide spectrum of methods can be used to reduce the number of features in a linear model.
+
+Pre-processing methods:
+\begin{itemize}
+    \item \textbf{Manually selected features}: You can always use expert knowledge to select or discard some features. The big drawback is that it cannot be automated and you need to have access to someone who understands the data
+    \item \textbf{Univariate selection}: An example is the correlation coefficient. You only consider features that exceed a certain threshold of correlation between the feature and the target. The disadvantage is that it only considers the features individually. Some features might not show a correlation until the linear model has accounted for some other features. Those ones you will miss with univariate selection methods.
+\end{itemize}
+
+Step-wise methods:
+\begin{itemize}
+    \item \textbf{Forward selection}: Fit the linear model with one feature. Do this with each feature. Select the model that works best (e.g. highest R-squared). Now again, for the remaining features, fit different versions of your model by adding each feature to your current best model. Select the one that performs best. Continue until some criterion is reached, such as the maximum number of features in the model.
+    \item \textbf{Backward selection}: Similar to forward selection. But instead of adding features, start with the model that contains all features and try out which feature you have to remove to get the highest performance increase. Repeat this until some stopping criterion is reached.
+\end{itemize}
+
+\subsubsection{Main issues of linear models and how to overcome them}
+\begin{figure}[H]
+    \includegraphics[width=0.5\textwidth]{img/three-lm-problems-1.jpeg}
+    \centering
+    \caption{Three assumptions of the linear model (left side): Gaussian distribution of the outcome given the features, additivity (= no interactions) and linear relationship. Reality usually does not adhere to those assumptions (right side): Outcomes might have non-Gaussian distributions, features might interact and the relationship might be nonlinear.}
+\end{figure}
+The biggest strength but also the biggest weakness of the linear regression model is that the prediction is modeled as a weighted sum of the features. In addition, the linear model comes with many other assumptions. The bad news is (well, not really news) that all those assumptions are often violated in reality: The outcome given the features might have a non-Gaussian distribution, the features might interact and the relationship between the features and the outcome might be nonlinear. The good news is that the statistics community has developed a variety of modifications that transform the linear regression model from a simple blade into a Swiss knife.
+
+There is a solution to all these problems:
+\begin{enumerate}
+    \item \textbf{the target outcome y given the features does not follow a Gaussian distribution.} 
+    Suppose I want to predict how many minutes I will ride my bike on a given day. As features I have the type of day, the weather and so on. If I use a linear model, it could predict negative minutes because it assumes a Gaussian distribution which does not stop at 0 minutes. Also if I want to predict probabilities with a linear model, I can get probabilities that are negative or greater than 1. 
+    The solution to this is to use Generalized Linear Models (GLMs for short), which are an extention to Linear Regression, that wraps the weighted sum of the features into a non-linear function and allows non-gaussian errors.
+    \item \textbf{The features interact}: To predict the number of bicycles rented, there may be an interaction between temperature and whether it is a working day or not. Perhaps, when people have to work, the temperature does not influence the number of rented bikes much, because people will ride the rented bike to work no matter what happens. On days off, many people ride for pleasure, but only when it is warm enough. When it comes to rental bicycles, you might expect an interaction between temperature and working day.
+    The solution to this id to add a column to the feature matrix that represens the interaction between the features and fit the model as usual.
+    \item \textbf{The true relationship between the features and y is not linear}:  Linearity in linear models means that no matter what value an instance has in a particular feature. For example the relation between the temperature and the number of rental bikes, if there are 10 degrees outside and the temperature increases by one degree the change in the number of rental bikes is not same as if outside there 40 degrees and the temperature increases by one degree.
+    Intuitively, one expects that increasing the temperature from 10 to 11 degrees Celsius has a positive effect on bicycle rentals and from 40 to 41 a negative effect. There are various solutions to this problem: 
+    \begin{itemize}
+        \item Feature transformation: apply a transformation (e.g logarithm) to the feature
+        \item Feature categorization: Another possibility to achieve a nonlinear effect is to discretize the feature; turn it into a categorical feature. For example, you could cut the temperature feature into 20 intervals with the levels [-10, -5), [-5, 0), … and so on.
+        \item Generalized Additive Models (GAMs): Why not 'simply' allow the (generalized) linear model to learn nonlinear relationships?That is the motivation behind GAMs. GAMs relax the restriction that the relationship must be a simple weighted sum, and instead assume that the outcome can be modeled by a sum of arbitrary functions of each feature. Mathematically, the relationship in a GAM looks like this: $g(E_Y(y|x))=\beta_0+f_1(x_{1})+f_2(x_{2})+\ldots+f_p(x_{p})$
+    \end{itemize}
+\end{enumerate}
+
+\begin{figure}[H]
+    \includegraphics[width=0.7\textwidth]{img/nonlinear-effects-1.jpeg}
+    \centering
+    \caption{Predicting the number of rented bicycles using only the temperature feature. A linear model (top left) does not fit the data well. One solution is to transform the feature with e.g. the logarithm (top right), categorize it (bottom left), which is usually a bad decision, or use Generalized Additive Models that can automatically fit a smooth curve for temperature (bottom right).}
+\end{figure}
+
+Most modifications of the linear model make the model less interpretable.
+
+\subsection{Decision Trees}
+Linear regression and logistic regression models fail in situations where the relationship
+between features and outcome is nonlinear or where features interact with each other.\\
+
+Tree based models split the data multiple times according to certain cutoff values in the features. Through splitting, different subsets of the dataset are created, with each instance belonging to one subset. The final subsets are called terminal or leaf nodes and the intermediate subsets are called internal nodes or split nodes. To predict the outcome in each leaf node, the average outcome of the training data in this node is used. Trees can be used for classification and regression.\\
+
+There are various algorithms that can grow a tree. They differ in the possible structure of the tree (e.g. number of splits per node), the criteria how to find the splits, when to stop splitting and how to estimate the simple models within the leaf nodes. The classification and regression trees (CART) algorithm is probably the most popular algorithm for tree induction.
+The following formula describes the relationship between the outcome y and features x.
+\begin{equation*}
+    \hat{y}=\hat{f}(x)=\sum_{m=1}^Mc_m{}I\{x\in{}R_m\}
+\end{equation*}
+Each instance falls into exactly one leaf node (=subset $R_m$). $I_{\{x\in{}R_m\}}$ is the identity function that returns 1 if $x$ is in the subset $R_m$ and 0 otherwise. If an instance falls into a leaf node $R_l$, the predicted outcome is $\hat{y}=c_l$, where $c_l$ is the average of all training instances in leaf node $R_l$.
+
+\subsubsection{Splitting criterion}
+The best cut-off point makes the two resulting subsets as different as possible with respect to the target outcome.\\
+CART takes a feature and determines which cut-off point minimizes the variance of y for a regression task or the Gini index of the class distribution of y for classification tasks. The variance tells us how much the y values in a node are spread around their mean value. The Gini index tells us how “impure” a node is, e.g. if all classes have the same frequency, the node is impure, if only one class is present, it is maximally pure.\\
+
+The algorithm continues this search-and-split recursively in both new nodes until a stop
+criterion is reached. Possible criteria are:
+\begin{itemize}
+    \item A minimum number of instances that have to be in a node before the split
+    \item The minimum number of instances that have to be in a terminal node.
+\end{itemize}
+
+\subsubsection{Interpretation}
+\begin{itemize}
+    \item \textbf{Straightforward:} starting from the root node, you go to the next nodes and the edges tell you
+    which subsets you are looking at until you reach the terminal node.
+    \item \textbf{Feature importance:} Go through all the splits for which the feature was used and measure how much it has reduced the
+    variance or Gini index compared to the parent node. The sum of all importances is scaled to 100. This means that each importance can be interpreted as share of the overall model importance.
+    \item \textbf{Tree decomposition:} Individual predictions of a decision tree can be explained by decomposing the decision path into one component per feature. We can track a decision through the tree and explain a prediction by the contributions added at each decision node.
+    The root node in a decision tree is our starting point. If we were to use the root node to make predictions, it would predict the mean of the outcome of the training data. With the next split, we either subtract or add a term to this sum, depending on the next node in the path. To get to the final prediction, we have to follow the path of the data instance that we want to explain and keep adding to the formula.
+    \begin{equation*}
+        \hat{f}(x)=\bar{y}+\sum_{d=1}^D\text{split.contrib(d,x)}=\bar{y}+\sum_{j=1}^p\text{feat.contrib(j,x)}
+    \end{equation*}
+    The prediction of an individual instance is the mean of the target outcome plus the sum of all contributions of the D splits that occur between the root node and the terminal node where the instance ends up. We are not interested in the split contributions though, but in the feature contributions. A feature might be used for more than one split or not at all. We can add the contributions for each of the p features and get an interpretation of how much each feature has contributed to a prediction.
+\end{itemize}
+
+
