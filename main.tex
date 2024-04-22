@@ -43,6 +43,7 @@
 \newcommand{\red}{\color{red}}
 \newcommand{\blue}{\color{blue}}
 \newcommand{\black}{\color{black}}
+
 \algnewcommand\algorithmicforeach{\textbf{for each}}
 \algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
 
@@ -53,6 +54,11 @@
 \renewcommand{\ref}[1]{\textbf{\ref{#1}}}
 
 \begin{document}
+\newif\ifgooditem
+\gooditemtrue
+\newcommand\gooditem{\gooditemtrue\item}
+\newcommand\baditem{\gooditemfalse\item}
+
 \title{ \normalsize \textsc{}
 		\\ [2.0cm]
 		\HRule{1.5pt} \\
@@ -77,6 +83,7 @@
 \include{sections/interpretability}
 \include{sections/taxonomy}
 \include{sections/interpretable_models}
+\include{sections/model_agnostic}
 \bibliographystyle{ieeetr} 
 \bibliography{ref}
 \end{document}

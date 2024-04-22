@@ -27,10 +27,6 @@ Various methods can be used to estimate the optimal weight. The ordinary least s
 Estimated weights come with confidence intervals. A confidence interval is a range for the weight estimate that covers the “true” weight with a certain confidence. For example, a 95\% confidence interval for a weight of 
 2 could range from 1 to 3. The interpretation of this interval would be: If we repeated the estimation 100 times with newly sampled data, the confidence interval would include the true weight in 95 out of 100 cases, given 
 that the linear regression model is the correct model for the data.
-\newif\ifgooditem
-\gooditemtrue
-\newcommand\gooditem{\gooditemtrue\item}
-\newcommand\baditem{\gooditemfalse\item}
 
 Whether the model is the “correct” model depends on whether the relationships in the data meet certain assumptions:
 \begin{itemize}
@@ -251,5 +247,99 @@ criterion is reached. Possible criteria are:
     \end{equation*}
     The prediction of an individual instance is the mean of the target outcome plus the sum of all contributions of the D splits that occur between the root node and the terminal node where the instance ends up. We are not interested in the split contributions though, but in the feature contributions. A feature might be used for more than one split or not at all. We can add the contributions for each of the p features and get an interpretation of how much each feature has contributed to a prediction.
 \end{itemize}
+\newpage
+\subsubsection{Pros \& Cons of Decision Trees}
+\begin{minipage}[t]{0.45\textwidth}
+    \textcolor{ForestGreen}{\textbf{PROS}}
+    \begin{itemize}
+        \item Captures interactions between features and data
+        \item Data ends up in distinct groups that are easy to interpret
+        \item Have a natural visualization
+        \item Explanations are contrastive (easy to answer to what if question)
+        \item The truthfulness of the prediction depends on the predictive performance of the tree
+    \end{itemize}
+\end{minipage}
+\hspace*{0.05\textwidth}
+\begin{minipage}[t]{0.45\textwidth}
+    \textcolor{Red}{\textbf{CONS}}
+    \begin{itemize}
+        \item Fails to deal with linear relationships: Any linear relationship between an input feature to interpret and the outcome has to be approximated by splits, creating a step function. This is not efficient
+        \item Trees are also quite unstable: few changes in the training dataset can create a completely different tree. This is because each split depends on the parent split. And if a different feature is selected as the first split feature, the entire tree structure changes. It does not create confidence in the model if the structure changes so easily
+        \item Loose explainability at increasing depth
+    \end{itemize}
+\end{minipage}
 
+\subsection{Random Forests}
+Random forests or random decision forests is an ensemble learning method for classification, regression and other tasks that operates by constructing a multitude of decision trees at training time.
+For classification tasks, the output of the random forest is the class selected by most trees. For regression tasks, the mean or average prediction of the individual trees is returned.
+Random decision forests correct for decision trees' habit of overfitting to their training set. Random forests generally outperform decision trees.\\
 
+RF are constructed combining Breiman's bagging idea and random selection of features, in order to construct a collection of decision trees with controlled variance.
+
+\subsubsection{Bagging}
+Bagging stands for bootstrap aggregating. The idea is to create multiple datasets by sampling with replacement from the original dataset. Each dataset is used to train a model. The final prediction is the average of the predictions of all models. Bagging reduces the variance of the model.\\
+
+Given a training set $X=x_1,\ldots,x_n$ with responses $Y=y_1,\ldots,y_n$ bagging repeatedly ($B$ times) selects a random sample with replacement of the training set and fits trees to these samples:\\
+\begin{enumerate}
+    \item For $b=1,\ldots,B$:
+    \begin{enumerate}
+        \item Sample with replacement $n$ training examples from $X,Y$; call these $X_b,Y_b$
+        \item Train a decision or regression tree $f_b$ on $X_b,Y_b$
+    \end{enumerate}
+    \item After training, predictions for unseen samples $x'$ can be made by averaging the predictions from all the individual regression trees on $x'$:
+    \begin{equation*}
+        \hat{f}=\frac{1}{B}\sum_{b=1}^Bf_b(x')
+    \end{equation*}
+    or by taking the plurality vote in the case of classification trees.
+\end{enumerate}
+
+RF reduces the variance in the sample and does not increase bias as long as the trees are not correlated.
+An estimate of the uncertainty of the prediction can be made as the standard deviation of the predictions from all the individual regression trees on $x'$.
+\begin{equation}
+    \sigma=\sqrt{\frac{\sum_{b=1}^B(f_b(x')-\hat{f})^2}{B-1}}
+\end{equation}
+
+The number of samples/trees, B, is a free parameter. Typically, a few hundred to several thousand
+trees are used, depending on the size and nature of the training set. An optimal number of trees B can
+be found using cross-validation, or by observing the out-of-bag error: the mean prediction error on
+each training sample xi, using only the trees that did not have xi in their bootstrap sample.The
+training and test error tend to level off after some number of trees have been fit.
+
+\subsubsection{Feature Bagging}
+RF also include another type of bagging scheme: they use a modified tree
+learning algorithm that selects, at each candidate split in the learning process, a random
+subset of the features.
+
+The reason for doing this is the correlation of the trees in an ordinary bootstrap sample: if one or a few
+features are very strong predictors for the response variable (target output), these features will be
+selected in many of the B trees, causing them to become correlated.
+
+\subsubsection{RF for high number of features}
+If many features are available but only few are relevant to the task the RF can fail. Som possible solutions are:
+\begin{itemize}
+    \item \textbf{Prefiltering}: Eliminate features that are mostly just noise.
+    \item \textbf{Enriched Random Forest (ERF)}: Use weighted random sampling instead of simple random sampling
+    at each node of each tree, giving greater weight to features that appear to be more informative.
+    \item \textbf{Tree Weighted Random Forest (TWRF):} Weight trees so that trees exhibiting better accuracy are
+    assigned higher weights.
+\end{itemize}
+
+\subsubsection{Permutation Feature Importance (PFI)}
+Known also as Mean Decrease Accuracy (MDA), the idea is that permuting an important feature would result in a large decrease in accuracy while permuting a less relevant feature would have a negligible effect.
+It measures the changes in the prediction error of the model (MSE in our case) when a single feature value is randomly shuffled.
+This modification of the model score is indicative of how much the model depends on that feature.
+
+\subsubsection{Mean Decrease in Impurity (MDI)}
+Variables which decrease the impurity during splits a lot are considered important.
+\begin{equation}
+    \text{unormalized average inportance}(x)=\frac{1}{nT}\sum_{i=1}^{nT}\sum_{node j\in T_i\mid\text{split variable}(j)=x} p_{T_i}(j)\Delta i_{T_i}(j)
+\end{equation}
+where $x$ indicates a feature, $n_T$ is the number of trees in the forest, $T_i$ indicates tree $i$\\
+$p_{T_i}(j)=\frac{n_j}{n}$ is the fraction of samples reaching node $j$ \\
+$\Delta i_{T_i}(j)$ is the change in impurity in tree $t$ at node $j$.
+
+While this approach is widely used for RF, having the advantage of being easy and fast to compute as it does not require to permute the data, it has several drawbacks:
+\begin{itemize}
+    \item biased in favor of variables with many possible split points and with high category frequencies
+    \item biased in presence of correlated features.
+\end{itemize}
