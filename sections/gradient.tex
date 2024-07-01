@@ -1,0 +1,64 @@
+\section{Perturbation and Gradient-based XAI methods}
+The goal of gradient based attribution methods is to estimate the attribution maps $A^c=\{A_i^c\}^N_{i=1}\in \mathbb{R}^N$.
+The attribution map $A^c$ captures the importance of each input feature for a specific output class c and has the
+same size N as the input.
+
+\subsection{Notaion}
+\begin{itemize}
+    \item An N dimensional input $\bm{x}=\{x_i\}_{i=1}^N \in \mathbb{R}^N$
+    \item A C-dimensional output $S(\bm{x})=\{S_c\}_{c=1}^C \in \mathbb{R}^C$
+    \item $S_c(\bm{x})$ represents the network's score function. $S$ can be either a class score or soft-max probability.
+\end{itemize}
+
+\subsection{Perturbation-based methods - Occlusion}
+Perturbation-based methods directly compute the attribution of an input feature (or set of features) by removing, masking or altering them, and running a forward pass on the new input, measuring the difference with the original output.
+The famous occlusion method was presented by \cite{DBLP:conf/eccv/ZeilerF14}. \\
+In details each feature $x_i$ (or a set/window of feature for images) is replaced at the time with a zero baseline and the effect of this perturbation is measured 
+on the target output:
+\begin{equation*}
+    A^c = S_c(\bm{x})-S_c(x_{[x_i=0]}) \quad for\; i = 1, \ldots, N
+\end{equation*}
+where $x_{[x_i=0]}$ indicates a sample $x\in\mathbb{R}^N$ whose ith component component has been replaced with 0.\\
+
+While perturbation-based methods allow a direct estimation of the marginal effect of a feature, they tend to be \textbf{very slow as the number of features to test grows}.\\
+
+\subsection{Gradient-based methods}
+\begin{itemize}
+    \item Attribution scores are obtained calculating the gradient of the outputs with respect to the extracted features or the input. 
+    \item Generally, the gradients are noisy, leading to attribution maps that may show contributions
+    from irrelevant features. Various alterations to the gradient-based approach have been
+    proposed to handle the challenge of noise in attribution maps
+    \item Differently from the backpropagation algorithm used for training, to obtain the saliency
+    map what is backpropagated is not the classification error, or loss, but directly the
+    classification probability for a given class.
+\end{itemize}
+
+\subsubsection{Gradients in the linear case}
+We considere a linear model with N+1 parameters $\theta$ and $N$ input features
+\begin{equation*}
+    y=\theta_0+\sum_{i=1}^N \theta_i x_i+\epsilon = \bm{\theta}^T \bm{x} + \epsilon
+\end{equation*}
+The partial derivative of the output y with respect to the input $\bm{x}$ results in model parameters $\theta$ which represent contributions of input features.
+Thus for the linear case, as seen in previous lessons, model parameters serve as feature attributions.
+
+\subsubsection{Vanilla gradient or Saliency maps}
+Introduced by \cite{DBLP:journals/corr/SimonyanVZ13} it's one of the first attribution approaches. It simply calculates the gradient of the class score of interest with respect to the input.
+\begin{equation*}
+    A^c(x) = |\frac{\partial S_c(x)}{\partial x}| 
+\end{equation*}
+
+Algorithm steps:
+\begin{enumerate}
+    \item Perform a forward pass of the image of interest
+    \item Compute the gradient of class score of interest with respect to the input
+    \item Visualize the gradients in absolute value
+\end{enumerate}
+
+N.B $S_c$ is a nonlinear function of the input x and thus, in contrast to the linear case, the model parameters no more represent feature attributions. It has been shown that saliency maps represent the first-order approximation of the attributions.\\
+
+There is some ambiguity on how to perform a backward pass of the gradients. Non linear units such as ReLU "remove" the sign, so when doing backpass it is not possible
+to know whether to assign a positive or negative activation.\\
+
+\textbf{Backpass procedure:}\\
+Given the input $x$, during the forward pass, each CNN layer $l$ returns a feature activation map $f^l$ till the last layer $L$.
+During the backpass, starting from $f^L$ it is possible to generate the backpropagation map $R^L$
