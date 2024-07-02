@@ -206,21 +206,19 @@ The non-zero estimate can happen when the feature is correlated with another fea
 To obtain global information it is possible to average the absolute Shapley values per feature across the data.
 
 \subsection{SHAP Summary Plot}
-\begin{figure}[H]
-    \centering
-    \begin{minipage}{0.40\textwidth}
-        The summary plot combines feature importance with feature effects. Each point on the summary plot is a Shapley value for a feature and an instance. The position on the y-axis is determined by the feature and on the x-axis by the Shapley value. The color represents the value of the feature from low to high. Overlapping points are jittered in y-axis direction, so we get a sense of the distribution of the Shapley values per feature. The features are ordered according to their importance.\\
+\centering
+\begin{minipage}{0.40\textwidth}
+    The summary plot combines feature importance with feature effects. Each point on the summary plot is a Shapley value for a feature and an instance. The position on the y-axis is determined by the feature and on the x-axis by the Shapley value. The color represents the value of the feature from low to high. Overlapping points are jittered in y-axis direction, so we get a sense of the distribution of the Shapley values per feature. The features are ordered according to their importance.\\
 
-        In the summary plot, we see first indications of the relationship between the value of a feature and the impact on the prediction. But to see the exact form of the relationship, we have to look at SHAP dependence plots.
-    \end{minipage}
-    \hfill
-    \begin{minipage}{0.55\textwidth}
-        \begin{figure}[H]
-            \includegraphics[width=\textwidth]{img/shap-importance-extended.png}
-            \centering
-        \end{figure}
-    \end{minipage}
-\end{figure}
+    In the summary plot, we see first indications of the relationship between the value of a feature and the impact on the prediction. But to see the exact form of the relationship, we have to look at SHAP dependence plots.
+\end{minipage}
+\hfill
+\begin{minipage}{0.55\textwidth}
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{img/shap-importance-extended.png}
+        \centering
+    \end{figure}
+\end{minipage}
 
 \subsection{SHAP Dependence Plot}
 \begin{figure}[H]

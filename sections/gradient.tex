@@ -61,4 +61,115 @@ to know whether to assign a positive or negative activation.\\
 
 \textbf{Backpass procedure:}\\
 Given the input $x$, during the forward pass, each CNN layer $l$ returns a feature activation map $f^l$ till the last layer $L$.
-During the backpass, starting from $f^L$ it is possible to generate the backpropagation map $R^L$
+
+During the backpass, starting from $f^L$ it is possible to generate the backpropagation map $R^L$ by zeroing all the neuron activations except the one to be backpropagated (the one related to the
+target class). This procedure allows to reconstruct the input image $x$ showing the part of the
+input image that is most strongly activating this neuron.\\
+
+Each $R^l$ presents an intermediate step in the calculation of the Saliency, for the intermediate
+layer $l$. When reaching the CNN input layer, the reconstruction $R^1$ will have the same size of the input $x$.\\
+
+\textbf{Backpass through convolutional layers:}\\
+Starting from the convolutional layers, the respective activation in the forward pass can be expressed as: $f_{l+1}=f_l \circledast K_l$, where $K_l$ is a convolutional kernel. The gradient with respect to the output feature map $R^l$, for layer $l$ is then:
+\begin{equation*}
+    R^l = \frac{\partial R^{L}}{\partial f_l}=\frac{\partial R^{L}}{\partial f_{l+1}}\circledast \hat{K}_l
+\end{equation*}
+Where $\hat{K}_l$ is the flipped kernel of $K_l$ and $f$ is s the visualized neuron activity.\\
+The convolution with the flipped kernel exactly corresponds to computing the $l^{th}$ layer reconstruction $R^l$\\
+
+\textbf{Backpass through ReLU function:}\\
+The ReLU is a piece-wise linear function that is defined to be zero for all negative values of the
+node input and one otherwise, thus keeping unchanged the positive input values while annihilating
+the negative ones.\\
+\textbf{i.e.} When the activation of a neuron is zero we do not know which value to backpropagate.
+
+During the forward pass it can be defined as $f_{l+1}(x)=ReLU(f_l)=\max(f_l, 0)$.
+
+The respective backpropagation computes the gradient of $R^l$ with respect to the ReLU layer $l$ as:
+\begin{equation*}
+    R^l=\frac{\partial R^{L}}{\partial f_l}=\frac{\partial R^{L}}{\partial f_{l+1}}\cdot (f_l>0)=R^{l+1}\cdot (f_l>0)
+\end{equation*}
+$(f_l>0)$ defines which gradients are backpropagated and is also known as sign operator.\\
+In summary it passes gradient to a previous layer only if the original input was positive (the neurons are not dead).
+\newpage
+Example:
+\begin{figure}[H]
+    \includegraphics[width=0.3\textwidth]{img/backprop_relu.png}
+    \centering
+\end{figure}
+
+\subsubsection{DeconvNet}
+DeconvNet by \cite{DBLP:conf/eccv/ZeilerF14} is almost identical to Vanilla Gradient but makes a
+different choice for backpropagating the gradient through ReLU layer $l$
+\begin{equation*}
+    R^l=\frac{\partial R^{L}}{\partial f_l}=\frac{\partial R^{L}}{\partial f_{l+1}}\cdot (R^{l+1}>0)=R^{l+1}\cdot (R^{l+1}>0)
+\end{equation*}
+
+\begin{minipage}{0.55\textwidth}
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{img/DeconvNet.png}
+        \centering
+    \end{figure}    
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+    \underline{Difference with saliency:} the sign indicator is based on the output reconstruction $R^{l+1}$ of the precedent layer and not on the input activation $f_l$ to the layer.
+    \textbf{This allows only positive error signals to be backpropagated through the net} to obtain the final saliency map.
+    When backpassing from layer $l+1$ to layer $l$, DeconvNet “remembers” which of the activations in layer $l+1$ were set to zero in the forward pass and sets them to zero in layer $l$. Activations with a
+    negative value in layer $l+1$ are set to zero in layer $l$.
+\end{minipage}
+
+\subsubsection{Guided backpropagation}
+Presented by \cite{DBLP:journals/corr/SpringenbergDBR14} GBP combines DeconvNet and Saliency, leading to more
+focused heatmaps.\\
+The difference again is on the backpass through the ReLU layer $l$ which for GBP is defined as:
+\begin{equation*}
+    R^l=\frac{\partial R^{L}}{\partial f_l}=\frac{\partial R^{L}}{\partial f_{l+1}}\cdot (R^{l+1}>0)\cdot (f^{l}>0)=R^{l+1}\cdot (R^{l+1}>0)\cdot (f^{l}>0)
+\end{equation*}
+\begin{minipage}{0.55\textwidth}
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{img/guided_backprop.png}
+        \centering
+    \end{figure}    
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+    \begin{itemize}
+        \item Like DeconvNets, \textbf{only positive error signals are backpropagated} setting the negative gradients to zero.
+        \item Like in Saliency, \textbf{only positive inputs are considered}. The advantage of retaining only positive gradients is to prevent a backward flow of negative contributions corresponding to neurons which inhibit the
+        activation of the higher level neuron. As opposed to saliency, this can act as an additional guidance signal when traversing the network.
+        \item The absolute value of the gradient is taken as the relevance score
+    \end{itemize}
+\end{minipage}
+
+\subsubsection{SmoothGrad}
+The idea of SmoothGrad by \cite{DBLP:journals/corr/SmilkovTKVW17} is to make gradient-based explanations less
+noisy by adding noise and averaging over these artificially noisy gradients. SmoothGrad is not a standalone explanation method, but an extension to any gradient-based
+explanation method.\\
+
+SmoothGrad algorithm:
+\begin{enumerate}
+    \item Generate multiple versions of the image of interest by adding noise to it.
+    \item Create pixel attribution maps for all images.
+    \item Average the pixel attribution maps.
+\end{enumerate}
+
+The derivative fluctuates greatly at small scales. Neural networks have no incentive during training
+to keep the gradients smooth, their goal is to classify images correctly. The solution is to average over multiple maps so as to “smooths out” these fluctuations.\\
+\begin{equation*}
+    A^c(x) = \frac{1}{N\_noise}\sum_{i-1}^{N\_noise} A^c(x+g_i)
+\end{equation*}
+Where $g_i\sim N(0, \sigma^2)$ are noise maps sampled from the Gaussian distribution.\\
+
+Implementation suggestions: The ideal noise levels depends on the input image and the network. The authors suggest a level of 10-20\% which means $\frac{\sigma}{x_{max}-x_{min}}$ should be between 0.1 and 0.2.\\
+$x_{max}$ and $x_{min}$ are the minimum and maximum pixel values of the image. The $N_{noise}$ is an hyperparameter which represents the number of generated noisy samples. The authors suggests $N_{noise}=50$
+
+\subsubsection{Gradient $\odot$ input}
+Proposed by \cite{DBLP:journals/corr/ShrikumarGSK16}. In Gradient $\odot$ input the attribution scores are calculated by elementwise multiplication of gradients with the input:
+\begin{equation*}
+    A^c(x) = |\frac{\partial S_c(x)}{\partial x}| \odot x
+\end{equation*}
+The element-wise multiplication can be considered as an application of a model-independent filter
+(the input), which may reduce noise and smoothen the attribution map.
+
+\subsubsection{Problem with gradients methods}
