@@ -1,4 +1,4 @@
-\section{Perturbation and Gradient-based XAI methods}
+\section{Perturbation and Gradient-based methods}
 The goal of gradient based attribution methods is to estimate the attribution maps $A^c=\{A_i^c\}^N_{i=1}\in \mathbb{R}^N$.
 The attribution map $A^c$ captures the importance of each input feature for a specific output class c and has the
 same size N as the input.
@@ -173,3 +173,74 @@ The element-wise multiplication can be considered as an application of a model-i
 (the input), which may reduce noise and smoothen the attribution map.
 
 \subsubsection{Problem with gradients methods}
+If $S_c(x)$ is flat in the proximity of $x_i$, $\frac{\partial S_c(x)}{\partial x_i}=0$ and so $x_i\frac{\partial S_c(x)}{\partial x_i}=0$ possibly erroneously indicating that feature $x_i$ is irrelevant.§
+This happens because we train the model to saturation, thus the prediction score is near flat in the proximity of the input.\\
+
+Thus, changing $x_i$ by a small amount $\partial x_i$ because the surface $\frac{\partial S_c(x)}{\partial x_i}$ is flat in that proximity it
+will give us always zero — we are not looking at relevant gradients.\\
+
+Therefore, to capture relevant gradients, some XAI methods have proposed to see how
+gradients vary along a path from a reference neutral image (referred as the baseline) to the
+feature value.
+
+\subsection{Baseline attribution methods}
+Compare the input image to a reference baseline image, which represent a neutral signal to the network.
+
+This category includes model-specific gradient-based methods such as Deep Taylor andIntegrated Gradients, as well as model-agnostic methods such as LIME and SHAP.
+The interpretation is always done with respect to the baseline: The difference between
+classification scores of the actual image and the baseline image are attributed to the pixels.
+
+The choice of the reference image (distribution) has a big effect on the explanation.
+
+\subsubsection{Integrated Gradients}
+Proposed by \cite{DBLP:conf/icml/SundararajanTY17}.
+Let $x=\{x_i\}_{i=1}^N\in\mathbb{R}^N$ be the input and $x'=\{x'_i\}_{i=1}^N\in\mathbb{R}^N$ the baseline input. 
+IG considers the straightline path in $\mathbb{R}^N$ from the baseline $x'$ to the input $x$, and compute the gradients at all points
+along the path, accumulating them.\\
+
+The IG along the ith dimension for an input $x$ and a baseline $x'$ is defined as:
+\begin{equation*}
+    IntegratedGrads_i(x) \Coloneqq (x_i-x'_i)\int_{\alpha=0}^1 \frac{\partial S_c(x'+\alpha(x-x'))}{\partial x_i}d\alpha
+\end{equation*}
+where $\frac{\partial S_c(x)}{\partial x_i}$ is the gradient of $S_c(x)$ along the $i^{th}$ dimension.\\
+
+\textbf{Axioms}\\
+\begin{itemize}
+    \item \textit{Completeness}: the attributions for all input features should sum up to the difference between the output of the network at the given input and the output at a baseline input. Mathematically, this is expressed as: $\sum_{i=1}^N IntegratedGrads_i(x) = S_c(x)-S_c(x')$
+    \item \textit{Sensitivity}: if an input feature changes while all other features remain constant and the change in the input feature causes a change in the model output, then the attribution for that input feature should be non-zero. Conversely, if the change in the input feature does not cause any change in the model output, the attribution should be zero.
+    \item \textit{Implementation Invariance}: This axiom ensures that the attributions are consistent across functionally equivalent networks. If two networks compute the same function but are implemented differently (different architectures, parameterizations, etc.), the attributions should be the same.
+    \item \textit{Linearity}: If the model's output is a linear combination of two functions, then the attributions should be the corresponding linear combination of the attributions for each function. Mathematically $S3_c(x)=a\cdot S1_c(x)+b\cdot S2_c(x)$ then \\$IntegratedGrads_c(x)=a\cdot IntegratedGrads1_c(x)+b\cdot IntegratedGrads2_c(x)$. Intuitively, the attributions preserve any linearity within the network.
+    \item \textit{Symmetry}: For symmetric functions, symmetric inputs should have the same attributions. If the function $F(x, y) = F(y, x)$ , then the attributions for $x$ and $y$ should be equal.
+\end{itemize}
+
+\textbf{Graphical representation:}\\
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/IG.png}
+\end{figure}
+
+\textbf{Integrated Gradients vs Saliency maps}\\
+\begin{minipage}{0.55\textwidth}
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{img/IGvsSM.png}
+        \centering
+    \end{figure}    
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+    As already seen, saliency maps are the gradients of the input features of a neural network with respect to
+a final output. This explanation highlights the features that are the most reactive and likely to quickly
+change the output, but only makes sense for small deviations away from the original input. Hence the
+gradients received for saliency maps are generally in the model's saturated region of gradients.
+\end{minipage}\\
+
+\textbf{Practical implementation:}\\
+The integral of integrated gradients can be efficiently approximated via a summation. We simply sum the gradients at points occurring at sufficiently small intervals along the straightline path from the baseline $x'$ to the input $x$.
+\begin{equation*}
+    IntegratedGrads_i^{approx}(x) \Coloneqq (x_i-x'_i)\sum_{k=1}^m \frac{\partial S_c(x'+\frac{k}{m}(x-x'))}{\partial x_i}\frac{1}{m}
+\end{equation*}
+
+Here $m$ is the number of steps in the Riemman approximation of the integral. Notice that the approximation simply involves computing the gradient in a for loop which should be straightforward and efficient in most deep learning frameworks.
+
+The authors suggest that 20 and 300 steps are enough to approximate the integral (within 5\%) and recommend to check that the attributions approximately adds up to the difference between the score at
+the input and that at the baseline, if not increase the step-size m.
